@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cronograma de Equipos Médicos</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Logo en la esquina superior izquierda -->
+    <div class="logo-header">
+        <img src="/frontend-web/assets/logo.png" alt="Advanced Radiotherapy Corporation" class="logo-header-img">
+    </div>
+
+    <div class="app-container">
+        <!-- Sidebar de estadísticas -->
+        <div class="sidebar">
+            <h2>Dashboard</h2>
+            <div class="stats-card">
+                <h3>Equipos en garantía</h3>
+                <div class="stat-number" id="stats-vigente">0</div>
+            </div>
+            <div class="stats-card warning">
+                <h3>Próximos a vencer</h3>
+                <div class="stat-number" id="stats-proximo">0</div>
+            </div>
+            <div class="stats-card danger">
+                <h3>Garantías vencidas</h3>
+                <div class="stat-number" id="stats-vencido">0</div>
+            </div>
+        </div>
+        
+        <!-- Área principal -->
+        <div class="main-content">
+            <div class="tabs">
+                <button class="tab active">📋 Cronograma</button>
+                <button class="tab">📊 Dashboard</button>
+                <button class="tab">📅 Calendario</button>
+                <button class="tab">📈 Reportes</button>
+            </div>
+
+            <!-- Formulario para agregar equipos -->
+            <div class="form-container">
+                <h2>Agregar Nuevo Equipo</h2>
+                <form id="equipoForm" class="form-grid">
+                    <div class="form-group">
+                        <label>Equipo:</label>
+                        <input type="text" id="equipo" placeholder="Ej: Arco en C" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Cliente:</label>
+                        <input type="text" id="cliente" placeholder="Ej: Hospital Central" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Ubicación:</label>
+                        <input type="text" id="ubicacion" placeholder="Ej: Bogotá" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Garantía Fin:</label>
+                        <input type="date" id="garantia_fin" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Próx. Mantenimiento:</label>
+                        <input type="date" id="mantenimiento">
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Observaciones:</label>
+                        <textarea id="observaciones" rows="3" placeholder="Ingrese observaciones adicionales..."></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <button type="submit" class="btn-guardar">Guardar Equipo</button>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="table-container">
+                <table id="cronogramaTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Equipo</th>
+                            <th>Cliente</th>
+                            <th>Ubicación</th>
+                            <th>Garantía Fin</th>
+                            <th>Estado</th>
+                            <th>Próx. Mantenimiento</th>
+                            <th>Observaciones</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cronogramaBody">
+                        <tr>
+                            <td colspan="9" class="loading">Cargando equipos...</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <!-- Controles de paginación -->
+                <div class="pagination-container">
+                    <div class="pagination-info" id="paginationInfo">Mostrando 0-0 de 0 equipos</div>
+                    <div class="pagination-controls" id="paginationControls">
+                        <button class="pagination-btn" id="prevPage" disabled>◀ Anterior</button>
+                        <div class="pagination-numbers" id="paginationNumbers"></div>
+                        <button class="pagination-btn" id="nextPage" disabled>Siguiente ▶</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para ver detalles del equipo -->
+    <div id="detalleModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Detalles del Equipo</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body" id="detalleBody">
+                <div class="loading">Cargando detalles...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

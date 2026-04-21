@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Productos</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h2 { color: #333; border-bottom: 2px solid #2563eb; padding-bottom: 10px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"] { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        button { background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #1d4ed8; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #f8fafc; }
+        .acciones button { background: none; border: none; font-size: 16px; cursor: pointer; margin: 0 5px; }
+        .acciones button:hover { opacity: 0.7; }
+        .loading { text-align: center; padding: 20px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Gestión de Productos</h2>
+        
+        <form id="productoForm">
+            <div class="form-group">
+                <label>Nombre del Producto</label>
+                <input type="text" id="nombre_producto" required placeholder="Ej: Acelerador Lineal">
+            </div>
+            <button type="submit">Guardar Producto</button>
+        </form>
+
+        <h3>Productos Registrados</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="productosBody">
+                <tr><td colspan="3" class="loading">Cargando productos...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const API_URL = 'http://127.0.0.1:8000';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarProductos();
+        });
+
+        document.getElementById('productoForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const datos = {
+                nombre_producto: document.getElementById('nombre_producto').value,
+                numero_pieza: '',
+                transporte: '',
+                seguro: '',
+                valor_fob: 0,
+                tipo_producto: 'producto',
+                linea: 'ninguno',
+                referencia: '',
+                activo: true,
+                precios: { USD: 0, EUR: 0, COP: 0, VES: 0 },
+                iva_porcentaje: 19,
+                cantidad_stock: 0,
+                responsables: [],
+                descripcion: '',
+                imagen_url: ''
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/productos`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(datos)
+                });
+
+                if (response.ok) {
+                    alert('✅ Producto guardado');
+                    document.getElementById('productoForm').reset();
+                    cargarProductos();
+                } else {
+                    alert('❌ Error al guardar');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error de conexión');
+            }
+        });
+
+        async function cargarProductos() {
+            try {
+                const response = await fetch(`${API_URL}/productos`);
+                const productos = await response.json();
+                
+                const tbody = document.getElementById('productosBody');
+                tbody.innerHTML = '';
+                
+                if (productos.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3" class="loading">No hay productos registrados</td></tr>';
+                    return;
+                }
+                
+                productos.forEach(p => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${p.id}</td>
+                        <td><strong>${p.nombre_producto}</strong></td>
+                        <td class="acciones">
+                            <button onclick="eliminarProducto(${p.id})" title="Eliminar">🗑️</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('productosBody').innerHTML = '<tr><td colspan="3" class="loading">Error al cargar</td></tr>';
+            }
+        }
+
+        async function eliminarProducto(id) {
+            if (confirm('¿Eliminar producto?')) {
+                try {
+                    const response = await fetch(`${API_URL}/productos/${id}`, {
+                        method: 'DELETE'
+                    });
+                    if (response.ok) {
+                        alert('✅ Producto eliminado');
+                        cargarProductos();
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            }
+        }
+    </script>
+</body>
+</html>

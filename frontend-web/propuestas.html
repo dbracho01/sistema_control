@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Propuestas Comerciales - Sistema ART</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Estilos específicos para propuestas manteniendo la misma línea gráfica */
+        .propuestas-container {
+            max-width: 1400px;
+            margin: 30px auto;
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+        
+        /* Tarjeta de propuesta (el documento visual) */
+        .propuesta-documento {
+            padding: 40px;
+            background: white;
+        }
+        
+        /* Doble logo */
+        .propuesta-encabezado {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #2563eb;
+        }
+        
+        .empresa-info {
+            flex: 1;
+        }
+        
+        .empresa-logo {
+            margin-bottom: 12px;
+        }
+        
+        .empresa-logo-img {
+            height: 50px;
+            width: auto;
+            object-fit: contain;
+        }
+        
+        .empresa-detalles {
+            font-size: 11px;
+            color: #64748b;
+            line-height: 1.5;
+        }
+        
+        .empresa-detalles p {
+            margin: 3px 0;
+        }
+        
+        .logo-personalizable {
+            text-align: right;
+            flex-shrink: 0;
+            margin-left: 20px;
+        }
+        
+        .logo-personalizable-img {
+            max-width: 150px;
+            max-height: 70px;
+            object-fit: contain;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 5px;
+            background: white;
+        }
+        
+        .btn-cambiar-logo {
+            display: inline-block;
+            margin-top: 8px;
+            font-size: 10px;
+            color: #2563eb;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        
+        /* Número de propuesta */
+        .propuesta-numero {
+            text-align: right;
+            font-size: 24px;
+            font-weight: bold;
+            color: #ef4444;
+            margin-bottom: 20px;
+        }
+        
+        /* Información del cliente */
+        .cliente-info-propuesta {
+            background: #f8fafc;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+        }
+        
+        .cliente-info-propuesta h4 {
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+        
+        .cliente-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+        
+        .cliente-info-item {
+            font-size: 13px;
+        }
+        
+        .cliente-info-item strong {
+            color: #1e293b;
+        }
+        
+        /* Tabla de productos */
+        .productos-propuesta-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 13px;
+        }
+        
+        .productos-propuesta-table th {
+            background: #f1f5f9;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #1e293b;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .productos-propuesta-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .productos-propuesta-table tfoot td {
+            border-top: 2px solid #e2e8f0;
+            font-weight: 600;
+            background: #f8fafc;
+        }
+        
+        /* Totales */
+        .totales-propuesta {
+            text-align: right;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .totales-propuesta p {
+            margin: 6px 0;
+            font-size: 14px;
+        }
+        
+        .total-final-propuesta {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2563eb;
+        }
+        
+        /* Términos y condiciones */
+        .terminos-propuesta {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            font-size: 11px;
+            color: #64748b;
+        }
+        
+        /* Formulario de edición */
+        .form-section-propuesta {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .form-section-propuesta h3 {
+            color: #1e293b;
+            font-size: 1em;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .form-grid-propuesta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .productos-edicion-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 13px;
+        }
+        
+        .productos-edicion-table th {
+            background: #e2e8f0;
+            padding: 10px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .productos-edicion-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .productos-edicion-table input {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+        /* ===== ESTILOS DE INPUTS IGUAL A COTIZACIONES ===== */
+         .form-field input,
+         .form-field select,
+         .form-field textarea {
+           padding: 8px 12px;
+           border: 1px solid #ddd;
+           border-radius: 8px;
+           font-size: 13px;
+           transition: all 0.2s;
+           font-family: inherit;
+           background: white;
+           width: 100%;
+       }
+
+          .form-field input:focus,
+          .form-field select:focus,
+          .form-field textarea:focus {
+           outline: none;
+           border-color: var(--primary);
+           box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+         }
+
+          select#cliente_id {
+          padding: 8px 12px;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          font-size: 13px;
+          font-family: inherit;
+          background: white;
+          width: 100%;
+           }
+         /* ===== FIN ESTILOS INPUTS ===== */
+        
+        .btn-agregar-producto-propuesta {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .btn-agregar-producto-propuesta:hover {
+            background: #059669;
+        }
+        
+        .btn-eliminar-fila {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: #ef4444;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        
+        .btn-eliminar-fila:hover {
+            background: #fee2e2;
+        }
+        
+        .acciones-propuesta {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+        
+        /* Badges de estado */
+        .estado-badge-propuesta {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
+        .estado-borrador {
+            background: #f59e0b20;
+            color: #f59e0b;
+        }
+        
+        .estado-enviada {
+            background: #3b82f620;
+            color: #3b82f6;
+        }
+        
+        .estado-aprobada {
+            background: #10b98120;
+            color: #10b981;
+        }
+        
+        .estado-rechazada {
+            background: #ef444420;
+            color: #ef4444;
+        }
+                /* ===== ESTILOS PARA BOTONES DE ACCIÓN (como en cotizaciones) ===== */
+        .btn-accion {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: none;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            margin: 0 4px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .btn-accion.ver {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .btn-accion.ver:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(59,130,246,0.3);
+        }
+
+        .btn-accion.editar {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .btn-accion.editar:hover {
+            background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(245,158,11,0.3);
+        }
+
+        .btn-accion.eliminar {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .btn-accion.eliminar:hover {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(239,68,68,0.3);
+        }
+
+        .btn-accion:active {
+            transform: translateY(1px);
+        }
+
+        .acciones-cell {
+            white-space: nowrap;
+        }
+        /* ===== FIN ESTILOS BOTONES ===== */
+
+
+    </style>
+</head>
+<body>
+    <!-- Logo fijo en esquina superior izquierda (mismo que index) -->
+    <div class="logo-header">
+        <img src="/assets/logo.png" alt="Advanced Radiotherapy Corporation" class="logo-header-img">
+    </div>
+
+    <div class="app-container">
+        <div class="main-content">
+            <!-- Mismas tabs que en index -->
+            <div class="tabs">
+                <button class="tab" onclick="window.location.href='index.html'">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px; vertical-align: middle;">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                    Cronograma
+                </button>
+                <button class="tab" onclick="window.location.href='reportes.html'">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px; vertical-align: middle;">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+                        <path d="M14 2v6h6"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                        <polyline points="10 9 9 9 8 9"/>
+                    </svg>
+                    Reportes
+                </button>
+                <button class="tab" onclick="window.location.href='cotizaciones.html'">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px; vertical-align: middle;">
+                        <path d="M12 2v20M17 5H9.5M17 12h-5M17 19h-5"/>
+                        <path d="M5 5h14v14H5z"/>
+                        <circle cx="7.5" cy="9.5" r="1.5" fill="currentColor"/>
+                        <circle cx="7.5" cy="16.5" r="1.5" fill="currentColor"/>
+                    </svg>
+                    Cotizaciones
+                </button>
+                <button class="tab" onclick="window.location.href='clientes.html'">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px; vertical-align: middle;">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                    Clientes
+                </button>
+                <button class="tab" onclick="window.location.href='productos.html'">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px; vertical-align: middle;">
+                        <path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+                        <line x1="12" y1="11" x2="12" y2="15"/>
+                    </svg>
+                    Productos
+                </button>
+                <button class="tab active" onclick="window.location.href='propuestas.html'">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px; vertical-align: middle;">
+                        <path d="M4 4h16v16H4z"/>
+                        <line x1="8" y1="8" x2="16" y2="8"/>
+                        <line x1="8" y1="12" x2="16" y2="12"/>
+                        <line x1="8" y1="16" x2="12" y2="16"/>
+                        <circle cx="17" cy="17" r="2" fill="currentColor"/>
+                    </svg>
+                    Propuestas
+                </button>
+            </div>
+
+            <div class="propuestas-container">
+                <h2 style="margin-top: 0; color: #1e293b;">Propuestas Comerciales</h2>
+                
+                <!-- Formulario de propuesta -->
+                <form id="propuestaForm">
+                    <!-- Sección: Información General -->
+                    <div class="form-section-propuesta">
+                        <h3>Información General</h3>
+                        <div class="form-grid-propuesta">
+                            <div class="form-field">
+                                <label>N° Propuesta *</label>
+                                <input type="text" id="numero_propuesta" required placeholder="Ej: PROP-001">
+                            </div>
+                            <div class="form-field">
+                                <label>Fecha Emisión *</label>
+                                <input type="date" id="fecha_emision" required>
+                            </div>
+                            <div class="form-field">
+                                <label>Fecha Válida Hasta</label>
+                                <input type="date" id="fecha_validez">
+                            </div>
+                            <div class="form-field">
+                                <label>Vendedor/Asesor</label>
+                                <input type="text" id="vendedor" placeholder="Nombre del vendedor">
+                            </div>
+                            <div class="form-field">
+                                <label>Estado</label>
+                                <select id="estado">
+                                    <option value="Borrador">📝 Borrador</option>
+                                    <option value="Enviada">📨 Enviada</option>
+                                    <option value="Aprobada">✅ Aprobada</option>
+                                    <option value="Rechazada">❌ Rechazada</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sección: Cliente -->
+                    <div class="form-section-propuesta">
+                        <h3>Información del Cliente</h3>
+                        <div class="form-grid-propuesta">
+                            <div class="form-field full-width">
+                                <label>Cliente *</label>
+                                <select id="cliente_id" style="width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid #cbd5e1;">
+                                    <option value="">Seleccionar cliente existente...</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label>Nombre Cliente *</label>
+                                <input type="text" id="cliente_nombre" required placeholder="Nombre completo">
+                            </div>
+                            <div class="form-field">
+                                <label>Contacto</label>
+                                <input type="text" id="cliente_contacto" placeholder="Persona de contacto">
+                            </div>
+                            <div class="form-field">
+                                <label>Email</label>
+                                <input type="email" id="cliente_email" placeholder="correo@ejemplo.com">
+                            </div>
+                            <div class="form-field">
+                                <label>Teléfono</label>
+                                <input type="text" id="cliente_telefono" placeholder="Teléfono de contacto">
+                            </div>
+                            <div class="form-field full-width">
+                                <label>Dirección</label>
+                                <input type="text" id="cliente_direccion" placeholder="Dirección de entrega/instalación">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sección: Logo Personalizable (esquina superior derecha) -->
+                    <div class="form-section-propuesta">
+                        <h3>Logo Personalizable (Esquina Superior Derecha)</h3>
+                        <div class="form-grid-propuesta">
+                            <div class="form-field">
+                                <label>Logo del Cliente/Proyecto</label>
+                                <input type="file" id="logo_personalizado" accept="image/*">
+                                <small style="font-size: 11px; color: #64748b;">Se mostrará en la esquina superior derecha de la propuesta</small>
+                                <div id="preview_logo_personalizado" style="margin-top: 10px;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sección: Productos/Equipos -->
+                    <div class="form-section-propuesta">
+                        <h3>Productos / Equipos</h3>
+                        <table class="productos-edicion-table" id="productosTable">
+                            <thead>
+                                <tr>
+                                    <th>Descripción del equipo</th>
+                                    <th>Modelo</th>
+                                    <th>Referencia</th>
+                                    <th>Valor Unitario</th>
+                                    <th>IVA (19%)</th>
+                                    <th>Valor Total</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="productosBody">
+                                <tr class="producto-row">
+                                    <td><input type="text" class="producto-descripcion" placeholder="Ej: Ecógrafo portátil"></td>
+                                    <td><input type="text" class="producto-modelo" placeholder="Modelo"></td>
+                                    <td><input type="text" class="producto-referencia" placeholder="Referencia"></td>
+                                    <td><input type="number" class="producto-valor" step="0.01" value="0" style="width: 110px;"></td>
+                                    <td class="producto-iva">$0.00</td>
+                                    <td class="producto-total">$0.00</td>
+                                    <td><button type="button" class="btn-eliminar-fila" onclick="eliminarFilaProducto(this)">🗑️</button></td>
+                                tr
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="6">
+                                        <button type="button" class="btn-agregar-producto-propuesta" onclick="agregarFilaProducto()">+ Agregar producto</button>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                        
+                        <div class="totales-propuesta">
+                            <p><strong>Subtotal:</strong> <span id="subtotal">$0.00</span></p>
+                            <p><strong>Total IVA (19%):</strong> <span id="total_iva">$0.00</span></p>
+                            <p class="total-final-propuesta"><strong>TOTAL PROPUESTA:</strong> <span id="total_general">$0.00</span></p>
+                        </div>
+                    </div>
+
+                    <!-- Sección: Notas y Términos -->
+                    <div class="form-section-propuesta">
+                        <h3>Notas y Términos</h3>
+                        <div class="form-field">
+                            <label>Notas adicionales</label>
+                            <textarea id="notas" rows="3" placeholder="Condiciones de entrega, garantía, etc..."></textarea>
+                        </div>
+                        <div class="form-field" style="margin-top: 15px;">
+                            <label>Términos y condiciones</label>
+                            <textarea id="terminos" rows="4" placeholder="Términos y condiciones de la propuesta...">Los precios incluyen IVA. La validez de esta propuesta es de 30 días. Formas de pago: Contado, Transferencia bancaria. Los equipos cuentan con garantía de 12 meses.</textarea>
+                        </div>
+                    </div>
+
+                    <div class="acciones-propuesta">
+                        <button type="button" class="btn-cancelar" onclick="limpiarFormulario()">Cancelar</button>
+                        <button type="submit" class="btn-guardar">💾 Guardar Propuesta</button>
+                    </div>
+                </form>
+
+                <!-- Listado de propuestas guardadas -->
+                <div class="table-container" style="margin-top: 30px;">
+                    <h3>Propuestas Registradas</h3>
+                    <table id="propuestasTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>N° Propuesta</th>
+                                <th>Cliente</th>
+                                <th>Fecha</th>
+                                <th>Vendedor</th>
+                                <th>Total</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="propuestasBody">
+                            <tr><td colspan="8" class="loading">Cargando propuestas...</td></tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="pagination-container">
+                        <div class="pagination-info" id="paginationInfo">Mostrando 0-0 de 0 propuestas</div>
+                        <div class="pagination-controls" id="paginationControls">
+                            <button class="pagination-btn" id="prevPage" disabled>◀ Anterior</button>
+                            <div class="pagination-numbers" id="paginationNumbers"></div>
+                            <button class="pagination-btn" id="nextPage" disabled>Siguiente ▶</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para ver propuesta completa -->
+    <div id="detalleModal" class="modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h2>Propuesta Comercial</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body" id="detalleBody">
+                <div class="loading">Cargando...</div>
+            </div>
+            <div class="modal-footer" style="padding: 15px; text-align: right; border-top: 1px solid #e2e8f0;">
+                <button class="btn-guardar" onclick="imprimirPropuestaModal()">🖨️ Imprimir</button>
+                <button class="btn-cancelar" onclick="cerrarModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="propuestas.js"></script>
+</body>
+</html>

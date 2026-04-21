@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Productos</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .productos-container {
+            max-width: 1100px;
+            margin: 30px auto;
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+        
+        .form-section {
+            background: var(--light);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .form-section h3 {
+            color: var(--dark);
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+        }
+        
+        .precios-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .stock-row {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+        
+        .stock-cantidad {
+            width: 150px;
+        }
+        
+        .responsables-container {
+            flex: 1;
+        }
+        
+        .responsable-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        
+        .responsable-item input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+        
+        .btn-agregar {
+            background: #10b981;
+            color: white;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-agregar:hover {
+            background: #059669;
+        }
+        
+        .btn-eliminar-responsable {
+            background: #ef4444;
+            color: white;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-eliminar-responsable:hover {
+            background: #dc2626;
+        }
+        
+        .btn-toggle-monedas {
+            background: none;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-toggle-monedas:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .form-field {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-field label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--gray);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+        
+        .form-field input,
+        .form-field select,
+        .form-field textarea {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 13px;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        
+        .form-field input:focus,
+        .form-field select:focus,
+        .form-field textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+        }
+        
+        .form-field input[type="number"] {
+            -moz-appearance: textfield;
+        }
+        
+        .form-field input[type="number"]::-webkit-outer-spin-button,
+        .form-field input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        
+        .form-field textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .checkbox-field {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 24px;
+        }
+        
+        .checkbox-field input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+        
+        .checkbox-field label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--gray);
+            cursor: pointer;
+            text-transform: uppercase;
+            margin: 0;
+        }
+        
+        .file-field {
+            margin-top: 10px;
+        }
+        
+        .file-field input[type="file"] {
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            width: 100%;
+            font-size: 13px;
+        }
+        
+        .acciones {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+        
+        .btn-guardar {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .btn-guardar:hover {
+            background: #1d4ed8;
+        }
+        
+        .btn-cancelar {
+            background: transparent;
+            color: var(--gray);
+            border: 1px solid #ddd;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-cancelar:hover {
+            background: var(--light);
+            border-color: var(--gray);
+        }
+        
+        .btn-accion {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            margin: 0 4px;
+            padding: 5px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        
+        .btn-accion:hover {
+            background: var(--light);
+        }
+         /* ===== ESTILOS CORREGIDOS PARA BOTONES DE ACCIÓN ===== */
+.btn-accion {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: none;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    margin: 0 4px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.btn-accion.ver {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.btn-accion.ver:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(59,130,246,0.3);
+}
+
+.btn-accion.editar {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.btn-accion.editar:hover {
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(245,158,11,0.3);
+}
+
+.btn-accion.eliminar {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.btn-accion.eliminar:hover {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(239,68,68,0.3);
+}
+
+.btn-accion:active {
+    transform: translateY(1px);
+}
+
+.acciones-cell {
+    white-space: nowrap;
+}
+/* ===== FIN ESTILOS CORREGIDOS ===== */
+
+
+        .table-container {
+            margin-top: 30px;
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        
+        th {
+            background: var(--light);
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--dark);
+            border-bottom: 2px solid #ddd;
+        }
+        
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #eee;
+            vertical-align: middle;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 30px;
+            color: var(--gray);
+        }
+        
+        .estado-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
+        .estado-activo {
+            background: #10b98120;
+            color: #10b981;
+        }
+        
+        .estado-inactivo {
+            background: #ef444420;
+            color: #ef4444;
+        }
+        
+        .preview-imagen {
+            margin-top: 10px;
+            max-width: 100px;
+            max-height: 100px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 5px;
+        }
+        
+        /* Estilos de paginación */
+        .pagination-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        .pagination-info {
+            font-size: 13px;
+            color: var(--gray);
+        }
+        
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .pagination-btn {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        
+        .pagination-btn:hover:not(:disabled) {
+            background: var(--light);
+            border-color: var(--primary);
+        }
+        
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .pagination-numbers {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .pagination-number {
+            background: white;
+            border: 1px solid #ddd;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        
+        .pagination-number:hover {
+            background: var(--light);
+            border-color: var(--primary);
+        }
+        
+        .pagination-number.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="logo-header">
+        <img src="/assets/logo.png" alt="Logo" class="logo-header-img">
+    </div>
+
+    <div class="app-container">
+        <div class="main-content">
+            <div class="tabs">
+                <button class="tab" onclick="window.location.href='index.html'">📋 Cronograma</button>
+                <button class="tab" onclick="window.location.href='reportes.html'">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" style="margin-right: 8px; vertical-align: middle;">
+                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+                     <path d="M14 2v6h6"/>
+                     <rect x="8" y="12" width="8" height="2" rx="1" fill="currentColor"/>
+                     <rect x="8" y="15" width="8" height="2" rx="1" fill="currentColor"/>
+                     <circle cx="17" cy="18" r="1.5" fill="currentColor"/>
+                     </svg>
+                     Reportes
+                </button>
+                <button class="tab" onclick="window.location.href='cotizaciones.html'">💰 Cotizaciones</button>
+                <button class="tab" onclick="window.location.href='clientes.html'">👥 Clientes</button>
+                <button class="tab active" onclick="window.location.href='productos.html'">📦 Productos</button>
+                 <button class="tab" onclick="window.location.href='propuestas.html'">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px; vertical-align: middle;">
+                  <path d="M4 4h16v16H4z"/>
+                  <line x1="8" y1="8" x2="16" y2="8"/>
+                  <line x1="8" y1="12" x2="16" y2="12"/>
+                  <line x1="8" y1="16" x2="12" y2="16"/>
+                  <circle cx="17" cy="17" r="2" fill="currentColor"/>
+               </svg>
+                Propuestas
+               </button>
+
+
+            </div>
+
+            <div class="productos-container">
+                <h2 style="margin-top: 0; color: var(--dark);">Gestión de Productos</h2>
+                
+                <form id="productoForm">
+                    <div class="form-section">
+                        <h3>Información del Producto</h3>
+                        <div class="form-grid">
+                            <div class="form-field">
+                                <label>Nombre del Producto *</label>
+                                <input type="text" id="nombre_producto" required placeholder="Ej: Acelerador Lineal">
+                            </div>
+                            <div class="form-field">
+                                <label>Número de Pieza</label>
+                                <input type="text" id="numero_pieza" placeholder="Ej: AP-2024-001">
+                            </div>
+                            <div class="form-field">
+                                <label>Transporte</label>
+                                <input type="text" id="transporte" placeholder="Ej: Aéreo, Marítimo">
+                            </div>
+                            <div class="form-field">
+                                <label>Seguro</label>
+                                <input type="text" id="seguro" placeholder="Ej: Incluido">
+                            </div>
+                            <div class="form-field">
+                                <label>Valor FOB (USD)</label>
+                                <input type="number" id="valor_fob" step="0.01" value="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Categoría</h3>
+                        <div class="form-grid">
+                            <div class="form-field">
+                                <label>Tipo de Producto</label>
+                                <select id="tipo_producto">
+                                    <option value="producto">Producto</option>
+                                    <option value="accesorio">Accesorio</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label>Línea</label>
+                                <select id="linea">
+                                    <option value="ninguno">Ninguno</option>
+                                    <option value="radiologia">Radiología</option>
+                                    <option value="cardiologia">Cardiología</option>
+                                    <option value="dosimetria">Dosimetría</option>
+                                    <option value="radioterapia">Radioterapia</option>
+                                    <option value="neurologia">Neurología</option>
+                                    <option value="medicina_nuclear">Medicina Nuclear</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label>Referencia</label>
+                                <input type="text" id="referencia" placeholder="Ej: REF-001">
+                            </div>
+                            <div class="checkbox-field">
+                                <input type="checkbox" id="activo" checked>
+                                <label for="activo">Activo</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Información de Precios</h3>
+                        
+                        <div style="display: flex; gap: 20px; align-items: flex-end; margin-bottom: 15px;">
+                            <div class="form-field" style="flex: 2;">
+                                <label>USD (Dólar) - Moneda Principal</label>
+                                <input type="number" id="precio_usd" step="0.01" value="0" style="font-weight: bold;">
+                            </div>
+                            <div class="form-field" style="flex: 1;">
+                                <label>IVA (%)</label>
+                                <input type="number" id="iva_porcentaje" step="0.1" value="19">
+                            </div>
+                        </div>
+
+                        <button type="button" id="btnMostrarOtrasMonedas" class="btn-toggle-monedas" onclick="toggleOtrasMonedas()">
+                            + Mostrar otras monedas
+                        </button>
+
+                        <div id="otrasMonedas" style="display: none; margin-top: 15px;">
+                            <div class="precios-grid">
+                                <div class="form-field">
+                                    <label>EUR (Euro)</label>
+                                    <input type="number" id="precio_eur" step="0.01" value="0">
+                                </div>
+                                <div class="form-field">
+                                    <label>COP (Peso Colombiano)</label>
+                                    <input type="number" id="precio_cop" step="0.01" value="0">
+                                </div>
+                                <div class="form-field">
+                                    <label>VES (Bolívar)</label>
+                                    <input type="number" id="precio_ves" step="0.01" value="0">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Stock y Responsables</h3>
+                        <div class="stock-row">
+                            <div class="stock-cantidad">
+                                <div class="form-field">
+                                    <label>Cantidad en Stock</label>
+                                    <input type="number" id="cantidad_stock" min="0" value="0">
+                                </div>
+                            </div>
+                            <div class="responsables-container">
+                                <label style="font-size: 11px; font-weight: 600; color: var(--gray); margin-bottom: 4px; text-transform: uppercase; display: block;">Responsables</label>
+                                <div id="responsables-container">
+                                    <div class="responsable-item">
+                                        <input type="text" class="responsable-input" placeholder="Nombre del responsable">
+                                        <button type="button" class="btn-agregar" onclick="agregarResponsable()">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Descripción e Imagen</h3>
+                        <div class="form-field">
+                            <label>Descripción del Producto</label>
+                            <textarea id="descripcion" placeholder="Descripción detallada del producto..."></textarea>
+                        </div>
+                        <div class="form-field file-field">
+                            <label>Imagen del Producto</label>
+                            <input type="file" id="imagen" accept="image/*">
+                            <div id="preview-imagen" class="preview-imagen"></div>
+                        </div>
+                    </div>
+
+                    <div class="acciones">
+                        <button type="button" class="btn-cancelar" onclick="window.location.href='productos.html'">Cancelar</button>
+                        <button type="submit" class="btn-guardar">💾 Guardar Producto</button>
+                    </div>
+                </form>
+
+                <div class="table-container">
+                    <h3>Productos Registrados</h3>
+                    <table id="productosTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Pieza</th>
+                                <th>Stock</th>
+                                <th>Responsables</th>
+                                <th>USD</th>
+                                <th>Estado</th>
+                                <th>Imagen</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productosBody">
+                            <tr><td colspan="9" class="loading">Cargando productos...<\/td><\/tr>
+                        </tbody>
+                    </table>
+                    
+                    <!-- Controles de paginación -->
+                    <div class="pagination-container">
+                        <div class="pagination-info" id="paginationInfo">Mostrando 0-0 de 0 productos</div>
+                        <div class="pagination-controls" id="paginationControls">
+                            <button class="pagination-btn" id="prevPage" disabled>◀ Anterior</button>
+                            <div class="pagination-numbers" id="paginationNumbers"></div>
+                            <button class="pagination-btn" id="nextPage" disabled>Siguiente ▶</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://127.0.0.1:8000';
+        let productoEnEdicion = null;
+        
+        let todosLosProductos = [];
+        let paginaActual = 1;
+        const productosPorPagina = 5;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarProductos();
+            
+            const prevBtn = document.getElementById('prevPage');
+            const nextBtn = document.getElementById('nextPage');
+            
+            if (prevBtn) {
+                prevBtn.addEventListener('click', () => {
+                    if (paginaActual > 1) {
+                        paginaActual--;
+                        renderizarPagina();
+                    }
+                });
+            }
+            
+            if (nextBtn) {
+                nextBtn.addEventListener('click', () => {
+                    const totalPaginas = Math.ceil(todosLosProductos.length / productosPorPagina);
+                    if (paginaActual < totalPaginas) {
+                        paginaActual++;
+                        renderizarPagina();
+                    }
+                });
+            }
+            
+            document.getElementById('imagen').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const preview = document.getElementById('preview-imagen');
+                        preview.innerHTML = `<img src="${e.target.result}" style="max-width: 100px; max-height: 100px;">`;
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        });
+
+        function toggleOtrasMonedas() {
+            const otrasMonedas = document.getElementById('otrasMonedas');
+            const btn = document.getElementById('btnMostrarOtrasMonedas');
+            if (otrasMonedas.style.display === 'none') {
+                otrasMonedas.style.display = 'block';
+                btn.innerHTML = '− Ocultar otras monedas';
+            } else {
+                otrasMonedas.style.display = 'none';
+                btn.innerHTML = '+ Mostrar otras monedas';
+            }
+        }
+
+        function agregarResponsable() {
+            const container = document.getElementById('responsables-container');
+            const newDiv = document.createElement('div');
+            newDiv.className = 'responsable-item';
+            newDiv.innerHTML = `
+                <input type="text" class="responsable-input" placeholder="Nombre del responsable">
+                <button type="button" class="btn-eliminar-responsable" onclick="this.parentElement.remove()">✖</button>
+            `;
+            container.appendChild(newDiv);
+        }
+
+        document.getElementById('productoForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            let imagen_url = '';
+            let esEdicion = productoEnEdicion !== null;
+            const fileInput = document.getElementById('imagen');
+            if (fileInput && fileInput.files.length > 0) {
+                const formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+                try {
+                    const uploadResponse = await fetch(`${API_URL}/subir-imagen`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    if (uploadResponse.ok) {
+                        const uploadData = await uploadResponse.json();
+                        imagen_url = uploadData.imagen_url;
+                        console.log("✅ Imagen subida:", imagen_url);
+                    }
+                } catch (error) {
+                    console.error('Error subiendo imagen:', error);
+                }
+            }
+            
+            if (esEdicion && !imagen_url) {
+                try {
+                    const response = await fetch(`${API_URL}/productos/${productoEnEdicion}`);
+                    const productoActual = await response.json();
+                    imagen_url = productoActual.imagen_url || '';
+                    console.log("📌 Manteniendo imagen existente:", imagen_url);
+                } catch (error) {
+                    console.error('Error obteniendo imagen actual:', error);
+                }
+            }
+
+            const responsables = [];
+            document.querySelectorAll('.responsable-input').forEach(input => {
+                if (input.value.trim()) {
+                    responsables.push(input.value.trim());
+                }
+            });
+            
+            const datos = {
+                nombre_producto: document.getElementById('nombre_producto').value,
+                numero_pieza: document.getElementById('numero_pieza').value,
+                transporte: document.getElementById('transporte').value,
+                seguro: document.getElementById('seguro').value,
+                valor_fob: parseFloat(document.getElementById('valor_fob').value) || 0,
+                tipo_producto: document.getElementById('tipo_producto').value,
+                linea: document.getElementById('linea').value,
+                referencia: document.getElementById('referencia').value,
+                activo: document.getElementById('activo').checked,
+                precios: {
+                    USD: parseFloat(document.getElementById('precio_usd').value) || 0,
+                    EUR: parseFloat(document.getElementById('precio_eur').value) || 0,
+                    COP: parseFloat(document.getElementById('precio_cop').value) || 0,
+                    VES: parseFloat(document.getElementById('precio_ves').value) || 0
+                },
+                iva_porcentaje: parseFloat(document.getElementById('iva_porcentaje').value) || 19,
+                cantidad_stock: parseInt(document.getElementById('cantidad_stock').value) || 0,
+                responsables: responsables,
+                descripcion: document.getElementById('descripcion').value,
+                imagen_url: imagen_url
+            };
+            
+            let url = `${API_URL}/productos`;
+            let method = 'POST';
+            if (productoEnEdicion) {
+                url = `${API_URL}/productos/${productoEnEdicion}`;
+                method = 'PUT';
+            }
+            
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(datos)
+                });
+                
+                if (response.ok) {
+                    alert(productoEnEdicion ? '✅ Producto actualizado' : '✅ Producto guardado');
+                    document.getElementById('productoForm').reset();
+                    productoEnEdicion = null;
+                    document.querySelector('.btn-guardar').textContent = 'Guardar Producto';
+                    document.getElementById('activo').checked = true;
+                    document.getElementById('iva_porcentaje').value = 19;
+                    document.getElementById('preview-imagen').innerHTML = '';
+                    document.getElementById('imagen').value = '';
+                    
+                    document.getElementById('otrasMonedas').style.display = 'none';
+                    document.getElementById('btnMostrarOtrasMonedas').innerHTML = '+ Mostrar otras monedas';
+                    
+                    document.getElementById('responsables-container').innerHTML = `
+                        <div class="responsable-item">
+                            <input type="text" class="responsable-input" placeholder="Nombre del responsable">
+                            <button type="button" class="btn-agregar" onclick="agregarResponsable()">+</button>
+                        </div>
+                    `;
+                    
+                    cargarProductos();
+                } else {
+                    alert('❌ Error al guardar');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error de conexión');
+            }
+        });
+
+        async function cargarProductos() {
+            try {
+                const response = await fetch(`${API_URL}/productos`);
+                const productos = await response.json();
+                todosLosProductos = productos;
+                
+                const tbody = document.getElementById('productosBody');
+                tbody.innerHTML = '';
+                
+                if (productos.length === 0) {
+                    tbody.innerHTML = '<table><td colspan="9" class="loading">No hay productos registrados<\/td><\/tr>';
+                    actualizarPaginacion(0, 0, 0);
+                    return;
+                }
+                
+                productos.forEach(p => {
+                    const tr = document.createElement('tr');
+                    const responsablesList = p.responsables?.length ? p.responsables.join(', ') : '-';
+                    
+                    let imagenHtml = '-';
+                    if (p.imagen_url) {
+                        const nombreArchivo = p.imagen_url.split('/').pop();
+                        imagenHtml = `<img src="http://localhost:8000/imagen/${nombreArchivo}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;" title="Imagen del producto">`;
+                    }
+                    
+                    tr.innerHTML = `
+                        <td>${p.id}</td>
+                        <td><strong>${p.nombre_producto}</strong></td>
+                        <td>${p.numero_pieza || '-'}</td>
+                        <td>${p.cantidad_stock || 0}</td>
+                        <td>${responsablesList}</td>
+                        <td>$${p.precios?.USD?.toFixed(2) || '0.00'}</td>
+                        <td><span class="estado-badge ${p.activo ? 'estado-activo' : 'estado-inactivo'}">${p.activo ? 'Activo' : 'Inactivo'}</span></td>
+                        <td style="text-align: center;">${imagenHtml}</td>
+                        <td>
+                            <button class="btn-accion ver" onclick="verProducto(${p.id})">👁️ Ver</button>
+                            <button class="btn-accion editar" onclick="editarProducto(${p.id})">✏️ Editar</button>
+                            <button class="btn-accion eliminar" onclick="eliminarProducto(${p.id})">🗑️ Eliminar</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+                
+                actualizarPaginacion(1, productos.length, productos.length);
+                renderizarNumerosPagina(Math.ceil(productos.length / productosPorPagina));
+                
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('productosBody').innerHTML = '<tr><td colspan="9" class="loading">Error al cargar productos<\/td><\/tr>';
+            }
+        }
+
+        function renderizarPagina() {
+            const tbody = document.getElementById('productosBody');
+            const totalPaginas = Math.ceil(todosLosProductos.length / productosPorPagina);
+            
+            if (todosLosProductos.length === 0) {
+                tbody.innerHTML = '<td><td colspan="9" class="loading">No hay productos registrados<\/td><\/tr>';
+                actualizarPaginacion(0, 0, 0);
+                return;
+            }
+            
+            const inicio = (paginaActual - 1) * productosPorPagina;
+            const fin = Math.min(inicio + productosPorPagina, todosLosProductos.length);
+            const productosPagina = todosLosProductos.slice(inicio, fin);
+            
+            tbody.innerHTML = '';
+            productosPagina.forEach(p => {
+                const tr = document.createElement('tr');
+                const responsablesList = p.responsables?.length ? p.responsables.join(', ') : '-';
+                
+                let imagenHtml = '-';
+                if (p.imagen_url) {
+                    const nombreArchivo = p.imagen_url.split('/').pop();
+                    imagenHtml = `<img src="http://localhost:8000/imagen/${nombreArchivo}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">`;
+                }
+                
+                tr.innerHTML = `
+                    <td>${p.id}</td>
+                    <td><strong>${p.nombre_producto}</strong></td>
+                    <td>${p.numero_pieza || '-'}</td>
+                    <td>${p.cantidad_stock || 0}</td>
+                    <td>${responsablesList}</td>
+                    <td>$${p.precios?.USD?.toFixed(2) || '0.00'}</td>
+                    <td><span class="estado-badge ${p.activo ? 'estado-activo' : 'estado-inactivo'}">${p.activo ? 'Activo' : 'Inactivo'}</span></td>
+                    <td style="text-align: center;">${imagenHtml}</td>
+                    <td>
+                          <button class="btn-accion ver" onclick="verProducto(${p.id})">👁️ Ver</button>
+                          <button class="btn-accion editar" onclick="editarProducto(${p.id})">✏️ Editar</button>
+                          <button class="btn-accion eliminar" onclick="eliminarProducto(${p.id})">🗑️ Eliminar</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            
+            actualizarPaginacion(inicio + 1, fin, todosLosProductos.length);
+            renderizarNumerosPagina(totalPaginas);
+        }
+
+        function actualizarPaginacion(inicio, fin, total) {
+            const pagInfo = document.getElementById('paginationInfo');
+            if (pagInfo) {
+                pagInfo.textContent = total === 0 ? 'Mostrando 0-0 de 0 productos' : `Mostrando ${inicio}-${fin} de ${total} productos`;
+            }
+            
+            const prevBtn = document.getElementById('prevPage');
+            const nextBtn = document.getElementById('nextPage');
+            if (prevBtn) prevBtn.disabled = paginaActual === 1;
+            if (nextBtn) nextBtn.disabled = paginaActual === Math.ceil(todosLosProductos.length / productosPorPagina);
+        }
+
+        function renderizarNumerosPagina(totalPaginas) {
+            const container = document.getElementById('paginationNumbers');
+            if (!container) return;
+            container.innerHTML = '';
+            
+            for (let i = 1; i <= totalPaginas; i++) {
+                const btn = document.createElement('button');
+                btn.className = `pagination-number ${i === paginaActual ? 'active' : ''}`;
+                btn.textContent = i;
+                btn.onclick = () => {
+                    paginaActual = i;
+                    renderizarPagina();
+                };
+                container.appendChild(btn);
+            }
+        }
+
+        function editarProducto(id) {
+            console.log("Editando producto ID:", id);
+            
+            fetch(`${API_URL}/productos/${id}`)
+                .then(response => response.json())
+                .then(producto => {
+                    console.log("Producto cargado:", producto);
+                    
+                    document.getElementById('nombre_producto').value = producto.nombre_producto || '';
+                    document.getElementById('numero_pieza').value = producto.numero_pieza || '';
+                    document.getElementById('transporte').value = producto.transporte || '';
+                    document.getElementById('seguro').value = producto.seguro || '';
+                    document.getElementById('valor_fob').value = producto.valor_fob || 0;
+                    document.getElementById('tipo_producto').value = producto.tipo_producto || 'producto';
+                    document.getElementById('linea').value = producto.linea || 'ninguno';
+                    document.getElementById('referencia').value = producto.referencia || '';
+                    document.getElementById('activo').checked = producto.activo || false;
+                    
+                    document.getElementById('precio_usd').value = producto.precios?.USD || 0;
+                    document.getElementById('precio_eur').value = producto.precios?.EUR || 0;
+                    document.getElementById('precio_cop').value = producto.precios?.COP || 0;
+                    document.getElementById('precio_ves').value = producto.precios?.VES || 0;
+                    document.getElementById('iva_porcentaje').value = producto.iva_porcentaje || 19;
+                    document.getElementById('cantidad_stock').value = producto.cantidad_stock || 0;
+                    
+                    const preview = document.getElementById('preview-imagen');
+                    if (producto.imagen_url) {
+                        const nombreArchivo = producto.imagen_url.split('/').pop();
+                        preview.innerHTML = `<img src="http://localhost:8000/imagen/${nombreArchivo}" style="max-width: 100px; max-height: 100px;">`;
+                    } else {
+                        preview.innerHTML = '';
+                    }
+                    
+                    const container = document.getElementById('responsables-container');
+                    container.innerHTML = '';
+                    if (producto.responsables && producto.responsables.length > 0) {
+                        producto.responsables.forEach(nombre => {
+                            const div = document.createElement('div');
+                            div.className = 'responsable-item';
+                            div.innerHTML = `
+                                <input type="text" class="responsable-input" value="${nombre.replace(/"/g, '&quot;')}" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 6px;">
+                                <button type="button" class="btn-eliminar-responsable" onclick="this.parentElement.remove()" style="background: #dc2626; color: white; border: none; border-radius: 6px; width: 32px; height: 32px; cursor: pointer;">✖</button>
+                            `;
+                            container.appendChild(div);
+                        });
+                    }
+                    const div = document.createElement('div');
+                    div.className = 'responsable-item';
+                    div.innerHTML = `
+                        <input type="text" class="responsable-input" placeholder="Nombre del responsable" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 6px;">
+                        <button type="button" class="btn-agregar" onclick="agregarResponsable()" style="background: #10b981; color: white; border: none; border-radius: 6px; width: 32px; height: 32px; cursor: pointer;">+</button>
+                    `;
+                    container.appendChild(div);
+                    
+                    document.getElementById('descripcion').value = producto.descripcion || '';
+                    
+                    productoEnEdicion = id;
+                    
+                    const btnGuardar = document.querySelector('.btn-guardar');
+                    if (btnGuardar) {
+                        btnGuardar.textContent = 'Actualizar Producto';
+                    }
+                    
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("Error al cargar producto");
+                });
+        }
+
+        async function eliminarProducto(id) {
+            if (confirm('¿Eliminar producto?')) {
+                try {
+                    const response = await fetch(`${API_URL}/productos/${id}`, {
+                        method: 'DELETE'
+                    });
+                    if (response.ok) {
+                        alert('✅ Producto eliminado');
+                        cargarProductos();
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            }
+
+                    function verProducto(id) {
+            window.open(`${API_URL}/ver-producto/${id}`, '_blank');
+        }
+        }
+    </script>
+</body>
+</html>

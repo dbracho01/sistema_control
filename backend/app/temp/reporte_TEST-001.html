@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 10pt;
+            line-height: 1.4;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #2563eb;
+            padding-bottom: 10px;
+        }
+        .logo {
+            width: 140px;
+        }
+        .info-box {
+            background: #f8fafc;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-align: right;
+        }
+        .numero-reporte {
+            font-size: 14pt;
+            font-weight: bold;
+            color: #ef4444;
+            margin-bottom: 5px;
+        }
+        .seccion {
+            margin: 15px 0;
+            padding: 10px;
+            background: #f8fafc;
+            border-radius: 5px;
+        }
+        .seccion-titulo {
+            font-weight: bold;
+            font-size: 11pt;
+            border-bottom: 1px solid #ccc;
+            margin-bottom: 8px;
+            padding-bottom: 3px;
+            color: #2563eb;
+        }
+        .campo {
+            margin: 5px 0;
+        }
+        .etiqueta {
+            font-weight: bold;
+            color: #4b5563;
+            display: inline-block;
+            min-width: 120px;
+        }
+        .valor {
+            display: inline-block;
+        }
+        .firmas {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+        }
+        .firma-item {
+            text-align: center;
+            width: 30%;
+        }
+        .linea-firma {
+            border-top: 1px solid black;
+            margin-top: 30px;
+            padding-top: 5px;
+        }
+        .marcado { color: #2563eb; font-weight: bold; }
+        .no-marcado { color: #9ca3af; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="file:///home/bracho/Escritorio/sistema_control/frontend-web/assets/logo.png" class="logo">
+        <div class="info-box">
+            <div class="numero-reporte">TEST-001</div>
+            <div><span class="etiqueta">FECHA:</span> 2024-01-01</div>
+            <div><span class="etiqueta">HORAS:</span> 3</div>
+            <div><span class="etiqueta">DÍAS:</span> 1</div>
+        </div>
+    </div>
+
+    <!-- INFORMACIÓN GENERAL -->
+    <div class="seccion">
+        <div class="seccion-titulo">INFORMACIÓN GENERAL</div>
+        <div class="campo"><span class="etiqueta">Técnico:</span> test</div>
+        <div class="campo"><span class="etiqueta">Hora:</span> </div>
+    </div>
+
+    <!-- SERVICIOS REALIZADOS -->
+    <div class="seccion">
+        <div class="seccion-titulo">SERVICIOS REALIZADOS</div>
+        <div class="campo">
+            <span class="etiqueta">Instalación:</span> 
+            <span class="no-marcado">
+                ⚪ NO
+            </span>
+        </div>
+        <div class="campo">
+            <span class="etiqueta">MTTO. Preventivo:</span> 
+            <span class="no-marcado">
+                ⚪ NO
+            </span>
+        </div>
+        <div class="campo">
+            <span class="etiqueta">MTTO. Correctivo:</span> 
+            <span class="no-marcado">
+                ⚪ NO
+            </span>
+        </div>
+        <div class="campo">
+            <span class="etiqueta">Asesoría:</span> 
+            <span class="no-marcado">
+                ⚪ NO
+            </span>
+        </div>
+        <div class="campo">
+            <span class="etiqueta">Consulta:</span> 
+            <span class="no-marcado">
+                ⚪ NO
+            </span>
+        </div>
+        <div class="campo">
+            <span class="etiqueta">Otros:</span> 
+            <span class="no-marcado">
+                ⚪ NO
+            </span>
+        </div>
+        
+        <div class="campo"><span class="etiqueta">Especifique:</span> -</div>
+        
+    </div>
+
+    <!-- ESTADO DEL EQUIPO -->
+    <div class="seccion">
+        <div class="seccion-titulo">ESTADO DEL EQUIPO</div>
+        <div class="campo">
+            <span class="etiqueta">Equipo Nuevo:</span> 
+            <span class="no-marcado">
+                ⚪ NO
+            </span>
+        </div>
+        <div class="campo">
+            <span class="etiqueta">Equipo Usado:</span> 
+            <span class="no-marcado">
+                ⚪ NO
+            </span>
+        </div>
+    </div>
+
+    <!-- INSTITUCIÓN -->
+    <div class="seccion">
+        <div class="seccion-titulo">INSTITUCIÓN</div>
+        <div class="campo"><span class="etiqueta">Institución:</span> -</div>
+        <div class="campo"><span class="etiqueta">Servicio:</span> -</div>
+        <div class="campo"><span class="etiqueta">Responsable:</span> -</div>
+    </div>
+
+    <!-- DATOS DEL EQUIPO -->
+    <div class="seccion">
+        <div class="seccion-titulo">DATOS DEL EQUIPO</div>
+        <div class="campo"><span class="etiqueta">Equipo:</span> -</div>
+        <div class="campo"><span class="etiqueta">Marca:</span> -</div>
+        <div class="campo"><span class="etiqueta">Modelo:</span> -</div>
+        <div class="campo"><span class="etiqueta">Serie:</span> -</div>
+    </div>
+
+    <!-- COMENTARIOS -->
+    <div class="seccion">
+        <div class="seccion-titulo" style="text-align: center;">COMENTARIOS</div>
+        <div class="campo">Sin comentarios</div>
+    </div>
+
+    <!-- DESCRIPCIÓN DEL PROBLEMA -->
+    <div class="seccion">
+        <div class="seccion-titulo">DESCRIPCIÓN DEL PROBLEMA / FALLA</div>
+        <div class="campo">No especificado</div>
+    </div>
+
+    <!-- ACCESORIOS Y/O PARTES -->
+    <div class="seccion">
+        <div class="seccion-titulo">ACCESORIOS Y/O PARTES</div>
+        <div class="campo">No especificado</div>
+    </div>
+
+    <!-- OBSERVACIONES -->
+    <div class="seccion">
+        <div class="seccion-titulo">OBSERVACIONES</div>
+        <div class="campo">Sin observaciones</div>
+    </div>
+
+    <!-- MATERIALES UTILIZADOS -->
+    <div class="seccion">
+        <div class="seccion-titulo">MATERIALES UTILIZADOS</div>
+        
+        <div class="campo">No se utilizaron materiales</div>
+        
+    </div>
+
+    <!-- FIRMAS -->
+    <div class="firmas">
+        <div class="firma-item">
+            <div><strong>Responsable técnico</strong></div>
+            <div class="linea-firma">____________________</div>
+        </div>
+        <div class="firma-item">
+            <div><strong>OPR (Cuando aplique)</strong></div>
+            <div class="linea-firma">____________________</div>
+        </div>
+        <div class="firma-item">
+            <div><strong>Responsable de la Institución</strong></div>
+            <div class="linea-firma">____________________</div>
+        </div>
+    </div>
+</body>
+</html>

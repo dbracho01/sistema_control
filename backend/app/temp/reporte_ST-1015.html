@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte Técnico</title>
+    <style>
+        /* ESTILOS FIJOS - NUNCA CAMBIAN */
+        body {
+            font-family: 'Helvetica', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: white;
+        }
+        .reporte {
+            max-width: 1000px;
+            margin: 0 auto;
+            border: 1px solid #ccc;
+            padding: 20px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            /* border-bottom: 2px solid #2563eb; */
+            padding-bottom: 15px;
+        }
+        .logo {
+            width: 350px;
+            height: auto;
+        }
+        .info-box {
+            padding: 10px 15px;
+            text-align: right;
+            min-width: 180px;
+            position: relative;
+            right: 8px;
+            border: 1px solid #000;  /* 🔹 borde negro completo */
+        }
+        
+        .numero-reporte {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ef4444;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+       .info-row {
+           display: flex;
+           justify-content: space-between;
+           align-items: center;
+           margin: 10px 0;
+           width: 100%;
+        }
+
+      .info-row:nth-child(2) .valor {
+           margin-left: 30px;  /* separación extra solo para HORAS */
+        }
+
+      .etiqueta {
+          font-weight: bold;
+          color: #4b5563;
+          min-width: 70px;
+          text-align: left;
+        }
+
+      .valor {
+          font-weight: normal;
+           min-width: 80px;
+         text-align: right;
+        }
+        
+        .servicios {
+             display: flex;
+             flex-direction: row;
+             flex-wrap: nowrap;
+             gap: 3px;  /* Espacio entre elementos */
+             margin: 20px 0;
+             background: transparent;
+             padding: 8px;
+             border-radius: 8px;
+             width: 100%;  /* Ocupa todo el ancho disponible */
+             box-sizing: border-box;
+             justify-content: space-between;  /* ✅ NUEVO: distribuye uniformemente */
+        }
+
+.servicio-item {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    white-space: nowrap;
+    font-size: 8px;  /* Texto más pequeño */
+    flex: 0 1 auto;  /* Que no se expandan forzadamente */
+    justify-content: center;       /* ✅ NUEVO: centra contenido */
+}
+
+.servicio-item span:first-child {
+    font-size: 12px;  /* Checkbox más pequeño */
+}
+        .no-marcado {
+    color: #080824;
+}
+      
+        .seccion {
+            margin: 20px 0;
+        }
+        .seccion-titulo {
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 5px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 3px;
+        }
+        .campo {
+            margin: 5px 0;
+        }
+        .firmas {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+        }
+        .firma-item {
+            text-align: center;
+            width: 30%;
+        }
+        .linea-firma {
+            border-top: 1px solid black;
+            margin-top: 30px;
+            padding-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="reporte">
+        <!-- HEADER: LOGO + NÚMERO DE REPORTE + FECHA/HORAS/DÍAS -->
+        <div class="header">
+            <img src="file:///home/bracho/Escritorio/sistema_control/frontend-web/assets/logo.png" 
+                 alt="Logo" class="logo">
+            <div class="info-box">
+                <div class="numero-reporte">ST-1015</div>
+                <div class="info-row">
+                    <span class="etiqueta">FECHA:</span>
+                    <span class="valor">2026-03-10</span>
+                </div>
+                <div class="info-row">
+                    <span class="etiqueta">HORAS:</span>
+                    <span class="valor">3</span>
+                </div>
+                <div class="info-row">
+                    <span class="etiqueta">DÍAS:</span>
+                    <span class="valor">1</span>
+                </div>
+            </div>
+        </div>
+
+                
+                        
+            <!-- SERVICIOS CON CHECKBOXES -->
+<!-- SERVICIOS CON CHECKBOXES -->
+<div class="servicios">
+    <div class="servicio-item">
+        <span style="font-size: 18px; font-family: monospace;">
+            [ ]
+        </span>
+         <span style="font-size: 14px; font-weight: bold;">INSTALACION</span>
+    </div>
+    <div class="servicio-item">
+        <span style="font-size: 18px; font-family: monospace;">
+            [ ]
+        </span>
+        <span style="font-size: 14px; font-weight: bold;">MTTO. PREVENTIVO</span>
+    </div>
+    <div class="servicio-item">
+        <span style="font-size: 18px; font-family: monospace;">
+            [✓]
+        </span>
+        <span style="font-size: 14px; font-weight: bold;">MTTO. CORRECTIVO</span>
+    </div>
+    <div class="servicio-item">
+        <span style="font-size: 18px; font-family: monospace;">
+            [ ]
+        </span>
+        <span style="font-size: 14px; font-weight: bold;">Asesoría</span>
+    </div>
+    <div class="servicio-item">
+        <span style="font-size: 18px; font-family: monospace;">
+            [ ]
+        </span>
+        <span style="font-size: 14px; font-weight: bold;">Consulta</span>
+    </div>
+    <div class="servicio-item">
+        <span style="font-size: 18px; font-family: monospace;">
+            [ ]
+        </span>
+        <span style="font-size: 14px; font-weight: bold;">Otros</span>
+    </div>
+</div>
+  <!-- EQUIPO NUEVO/USADO -->
+<div class="info-linea" style="display: flex; align-items: center; gap: 20px; margin: 10px 0;">
+    <div><span class="campo">Equipo:</span></div>
+    <div>
+        <span style="font-size: 18px; font-family: monospace;">
+            [✓]
+        </span>
+        <span style="font-weight: bold;">Nuevo</span>
+    </div>
+    <div>
+        <span style="font-size: 18px; font-family: monospace;">
+            [ ]
+        </span>
+        <span style="font-weight: bold;">Usado</span>
+    </div>
+</div>
+ <!-- INSTITUCIÓN, SERVICIO, RESPONSABLE -->
+<div style="display: flex; justify-content: space-between; align-items: center; margin: 15px 0;">
+    <div>
+        <span style="font-weight: bold;">Institución:</span>
+        <span class="valor">PRUEBA</span>
+    </div>
+    <div>
+        <span style="font-weight: bold;">Servicio:</span>
+        <span class="valor">RADIOLOGIA</span>
+    </div>
+    <div>
+        <span style="font-weight: bold;">Responsable:</span>
+        <span class="valor">DAVID BRACHO</span>
+    </div>
+</div>
+
+  <!-- EQUIPO, MARCA, MODELO, SERIE -->
+<div style="display: flex; justify-content: space-between; align-items: flex-start; margin: 10px 0;">
+    <div style="display: flex; flex-direction: column;">
+        <span style="font-weight: bold;">Equipo:</span>
+        <span class="valor">SAGINOVA</span>
+    </div>
+    <div style="display: flex; flex-direction: column;">
+        <span style="font-weight: bold;">Marca:</span>
+        <span class="valor">ALEMANiA</span>
+    </div>
+    <div style="display: flex; flex-direction: column;">
+        <span style="font-weight: bold;">Modelo:</span>
+        <span class="valor">-</span>
+    </div>
+    <div style="display: flex; flex-direction: column;">
+        <span style="font-weight: bold;">Serie:</span>
+        <span class="valor">103</span>
+    </div>
+</div>
+
+        <!-- COMENTARIOS -->
+        <div style="text-align: center; margin: 20px 0;">
+          <div style="font-weight: bold; font-size: 14px; margin-bottom: 5px;">Comentarios</div>
+          <div style="text-align: justify;">Se recomienda programar mantenimiento preventivo en 3 meses. Revisar conexiones eléctricas periódicamente. Cambiar filtro de aceite en la próxima intervención. Verificar calibración de sensores cada 6 meses.
+Se recomienda programar mantenimiento preventivo en 3 meses. Revisar conexiones eléctricas periódicamente. Cambiar filtro de aceite en la próxima intervención. Verificar calibración de sensores cada 6 meses.
+Se recomienda programar mantenimiento preventivo en 3 meses. Revisar conexiones eléctricas periódicamente. Cambiar filtro de aceite en la próxima intervención. Verificar calibración de sensores cada 6 meses.
+Se recomienda programar mantenimiento preventivo en 3 meses. Revisar conexiones eléctricas periódicamente. Cambiar filtro de aceite en la próxima intervención. Verificar calibración de sensores cada 6 meses</div>
+       </div>
+        <!-- DESCRIPCIÓN DEL PROBLEMA -->
+        <div class="seccion">
+          <div class="seccion-titulo">Descripción del Problema / Falla:</div>
+          <div style="text-align: justify;">Se recomienda programar mantenimiento preventivo en 3 meses. Revisar conexiones eléctricas periódicamente. Cambiar filtro de aceite en la próxima intervención. Verificar calibración de sensores cada 6 meses.
+Se recomienda programar mantenimiento preventivo en 3 meses. Revisar conexiones eléctricas periódicamente. Cambiar filtro de aceite en la próxima intervención. Verificar calibración de sensores cada 6 meses
+Se recomienda programar mantenimiento preventivo en 3 meses. Revisar conexiones eléctricas periódicamente. Cambiar filtro de aceite en la próxima intervención. Verificar calibración de sensores cada 6 meses.
+Se recomienda programar mantenimiento preventivo en 3 meses. Revisar conexiones eléctricas periódicamente. Cambiar filtro de aceite en la próxima intervención. Verificar calibración de sensores cada 6 meses</div>
+       </div>
+
+        <!-- ACCESORIOS -->
+       <div class="seccion">
+          <div class="seccion-titulo">Accesorios y/o Partes:</div>
+          <div style="text-align: justify;">Se recomienda programar mantenimiento preventivo en 3 meses. Revisar conexiones eléctricas periódicamente. Cambiar filtro de aceite en la próxima intervención. Verificar calibración de sensores cada 6 meses.
+Se recomienda programar mantenimiento preventivo en 3 meses. Revisar conexiones eléctricas periódicamente. Cambiar filtro de aceite en la próxima intervención. Verificar calibración de sensores cada 6 meses.
+Se recomienda programar mantenimiento preventivo en 3 meses. Revisar conexiones eléctricas periódicamente. Cambiar filtro de aceite en la próxima intervención. Verificar calibración de sensores cada 6 meses
+Se recomienda programar mantenimiento preventivo en 3 meses. Revisar conexiones eléctricas periódicamente. Cambiar filtro de aceite en la próxima intervención. Verificar calibración de sensores cada 6 meses.
+Se recomienda programar mantenimiento preventivo en 3 meses. Revisar conexiones eléctricas periódicamente. Cambiar filtro de aceite en la próxima intervención. Verificar calibración de sensores cada 6 meses</div>
+       </div>
+
+<!-- OBSERVACIONES -->
+       <div class="seccion">
+         <div class="seccion-titulo">Observaciones:</div>
+         <div style="text-align: justify;">Se recomienda programar mantenimiento preventivo en 3 meses. Revisar conexiones eléctricas periódicamente. Cambiar filtro de aceite en la próxima intervención. Verificar calibración de sensores cada 6 meses.
+Se recomienda programar mantenimiento preventivo en 3 meses. Revisar conexiones eléctricas periódicamente. Cambiar filtro de aceite en la próxima intervención. Verificar calibración de sensores cada 6 meses.
+Se recomienda programar mantenimiento preventivo en 3 meses. Revisar conexiones eléctricas periódicamente. Cambiar filtro de aceite en la próxima intervención. Verificar calibración de sensores cada 6 meses
+Se recomienda programar mantenimiento preventivo en 3 meses. Revisar conexiones eléctricas periódicamente. Cambiar filtro de aceite en la próxima intervención. Verificar calibración de sensores cada 6 meses.
+Se recomienda programar mantenimiento preventivo en 3 meses. Revisar conexiones eléctricas periódicamente. Cambiar filtro de aceite en la próxima intervención. Verificar calibración de sensores cada 6 meses</div>
+      </div>
+
+        <!-- MATERIALES -->
+        
+        <div class="seccion">
+            <div class="seccion-titulo">Materiales Utilizados</div>
+            
+            <div>• prueba (Cant: 1) - Ref: prueba</div>
+            
+            <div>• prueba 2 (Cant: 3) - Ref: prueba3</div>
+            
+            <div>• prueba 3  (Cant: 4) - Ref: prueba 4 </div>
+            
+            <div>• prueba4 (Cant: 4) - Ref: prueba5</div>
+            
+        </div>
+        
+ <!-- FIRMAS -->
+<div class="firmas">
+    <div class="firma-item">
+        <div>Responsable técnico</div>
+        <div><strong>Nombre:</strong> SAGINOVA</div>
+        <div style="margin-top: 25px; height: 2em;"></div>
+    </div>
+    <div class="firma-item">
+        <div>OPR (Cuando aplique)</div>
+        <div><strong>Nombre:</strong> prueba</div>
+        <div style="margin-top: 25px; height: 2em;"></div>
+    </div>
+    <div class="firma-item">
+        <div>Responsable de la Institución</div>
+        <div><strong>Nombre:</strong> SAGINOVA</div>
+        <div style="margin-top: 25px; height: 2em;"></div>
+    </div>
+</div>
+        <!-- PIE DE PÁGINA -->
+<div style="text-align: center; margin-top: 40px; font-size: 16px; color: #2563eb;">
+    <div>
+        <a href="http://www.artcorporationsa.com" target="_blank" style="color: #2563eb; text-decoration: none;">
+            www.artcorporationsa.com
+        </a>
+    </div>
+    <div style="margin-top: 5px; color: #333;">
+        Calle 89 A No 20-25 Telf: +57 4748364 Bogotá DC Colombia
+    </div>
+</div>
+
+</div> 
+</body>
+</html>
+    </div>
+</body>
+</html>

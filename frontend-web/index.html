@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cronograma de Equipos Médicos</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Logo en la esquina superior izquierda -->
+    <div class="logo-header">
+        <img src="/assets/logo.png" alt="Advanced Radiotherapy Corporation" class="logo-header-img">
+    </div>
+
+    <div class="app-container">
+        <!-- Sidebar de estadísticas -->
+        <div class="sidebar">
+            <h2>Dashboard</h2>
+            <div class="stats-card">
+                <h3>Equipos en garantía</h3>
+                <div class="stat-number" id="stats-vigente">0</div>
+            </div>
+            <div class="stats-card warning">
+                <h3>Próximos a vencer</h3>
+                <div class="stat-number" id="stats-proximo">0</div>
+            </div>
+            <div class="stats-card danger">
+                <h3>Garantías vencidas</h3>
+                <div class="stat-number" id="stats-vencido">0</div>
+            </div>
+        </div>
+        
+        <!-- Área principal -->
+        <div class="main-content">
+            <div class="tabs">
+                <button class="tab active" onclick="window.location.href='index.html'">
+                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px; vertical-align: middle;">
+                     <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                     <line x1="16" y1="2" x2="16" y2="6"/>
+                     <line x1="8" y1="2" x2="8" y2="6"/>
+                     <line x1="3" y1="10" x2="21" y2="10"/>
+                  </svg>
+                   Cronograma
+                </button>
+                
+                <button class="tab" onclick="window.location.href='reportes.html'">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px; vertical-align: middle;">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
+                        <path d="M14 2v6h6"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                        <polyline points="10 9 9 9 8 9"/>
+                    </svg>
+                    Reportes
+                </button>
+                
+                <button class="tab" onclick="window.location.href='cotizaciones.html'">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px; vertical-align: middle;">
+                        <path d="M12 2v20M17 5H9.5M17 12h-5M17 19h-5"/>
+                        <path d="M5 5h14v14H5z"/>
+                        <circle cx="7.5" cy="9.5" r="1.5" fill="currentColor"/>
+                        <circle cx="7.5" cy="16.5" r="1.5" fill="currentColor"/>
+                    </svg>
+                    Cotizaciones
+                </button>
+                
+                <button class="tab" onclick="window.location.href='clientes.html'">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px; vertical-align: middle;">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                    Clientes
+                </button>
+
+                <!-- Botón Productos -->
+                <button class="tab" onclick="window.location.href='productos.html'">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px; vertical-align: middle;">
+                        <path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+                        <line x1="12" y1="11" x2="12" y2="15"/>
+                    </svg>
+                    Productos
+                </button>
+                <!-- Botón Propuestas -->
+                <button class="tab" onclick="window.location.href='propuestas.html'">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px; vertical-align: middle;">
+                        <path d="M4 4h16v16H4z"/>
+                        <line x1="8" y1="8" x2="16" y2="8"/>
+                        <line x1="8" y1="12" x2="16" y2="12"/>
+                        <line x1="8" y1="16" x2="12" y2="16"/>
+                        <circle cx="17" cy="17" r="2" fill="currentColor"/>
+                   </svg>
+                   Propuestas
+                </button> 
+
+
+            </div>
+
+            <!-- Formulario para agregar equipos -->
+            <div class="form-container">
+                <h2>Agregar Nuevo Equipo</h2>
+                <form id="equipoForm" class="form-grid">
+                    <div class="form-group">
+                        <label>Equipo:</label>
+                        <input type="text" id="equipo" placeholder="Ej: Arco en C" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Cliente:</label>
+                        <input type="text" id="cliente" placeholder="Ej: Hospital Central" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Ubicación:</label>
+                        <input type="text" id="ubicacion" placeholder="Ej: Bogotá" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Garantía Inicio:</label>
+                        <input type="date" id="garantia_inicio" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Garantía Fin:</label>
+                        <input type="date" id="garantia_fin" required>
+                    </div>
+                    
+                    <!-- NUEVOS CAMPOS: Importado/Nacionalizado -->
+                    <div class="form-group checkbox-group">
+                        <label>Origen:</label>
+                        <div class="checkbox-options">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="importado" name="origen"> Importado
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="nacionalizado" name="origen"> Nacionalizado
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- NUEVOS CAMPOS: Mantenimientos -->
+                    <div class="form-group">
+                        <label>Mtto. Pendientes:</label>
+                        <input type="number" id="mtos_pendientes" min="0" value="0" placeholder="Ej: 4">
+                    </div>
+                    <div class="form-group">
+                        <label>Mtto. Realizados:</label>
+                        <input type="number" id="mtos_realizados" min="0" value="0" placeholder="Ej: 2">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Próx. Mtto.:</label>
+                        <input type="date" id="mtto_inicio">
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Observaciones:</label>
+                        <textarea id="observaciones" rows="3" placeholder="Ingrese observaciones adicionales..."></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <button type="submit" class="btn-guardar">Guardar Equipo</button>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="table-container">
+                <table id="cronogramaTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Equipo</th>
+                            <th>Cliente</th>
+                            <th>Ubicación</th>
+                            <th>Origen</th>
+                            <th>Mtto.</th>
+                            <th>Garantía Fin</th>
+                            <th>Estado</th>
+                            <th>Próx. Mtto.</th>
+                            <th>Observaciones</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cronogramaBody">
+                        <tr>
+                            <td colspan="11" class="loading">Cargando equipos...</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <!-- Controles de paginación -->
+                <div class="pagination-container">
+                    <div class="pagination-info" id="paginationInfo">Mostrando 0-0 de 0 equipos</div>
+                    <div class="pagination-controls" id="paginationControls">
+                        <button class="pagination-btn" id="prevPage" disabled>◀ Anterior</button>
+                        <div class="pagination-numbers" id="paginationNumbers"></div>
+                        <button class="pagination-btn" id="nextPage" disabled>Siguiente ▶</button>
+                    </div>
+                </div>
+            </div>
+        </div> <!-- Cierra main-content -->
+    </div> <!-- Cierra app-container -->
+
+    <!-- Modal para ver detalles del equipo -->
+    <div id="detalleModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Detalles del Equipo</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body" id="detalleBody">
+                <div class="loading">Cargando detalles...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
