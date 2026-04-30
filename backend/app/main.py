@@ -1,3 +1,10 @@
+from fastapi.responses import JSONResponse
+from fastapi import HTTPException, status
+from fastapi.responses import JSONResponse
+from passlib.context import CryptContext
+from jose import JWTError, jwt
+from datetime import datetime, timedelta
+from models.usuario import Usuario
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
@@ -989,3 +996,184 @@ def eliminar_propuesta(propuesta_id: int, db: Session = Depends(get_db)):
     except Exception as e:
         print(f"Error en DELETE /propuestas/{propuesta_id}: {e}")
         return {"error": str(e)}
+
+# ============================================
+# ENDPOINTS PARA USUARIOS Y AUTENTICACIÓN
+# ============================================
+
+# Configuración de seguridad
+from passlib.context import CryptContext
+from jose import JWTError, jwt
+from datetime import datetime, timedelta
+from models.usuario import Usuario
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+SECRET_KEY = "tu-clave-secreta-cambiala-en-produccion"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 480  # 8 horas
+
+class UsuarioCreate(BaseModel):
+    username: str
+    email: str
+    password: str
+    nombre_completo: Optional[str] = ""
+    permiso_cronograma: bool = False
+    permiso_reportes: bool = False
+    permiso_cotizaciones: bool = False
+    permiso_clientes: bool = False
+    permiso_productos: bool = False
+    permiso_propuestas: bool = False
+    permiso_usuarios: bool = False
+
+class LoginData(BaseModel):
+    username: str
+    password: str
+
+def verificar_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
+
+def hash_password(password):
+    return pwd_context.hash(password)
+
+def crear_token_acceso(data: dict, expires_delta: Optional[timedelta] = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+@app.post("/login")
+def login(login_data: LoginData, db: Session = Depends(get_db)):
+    from models.usuario import Usuario
+    
+    usuario = db.query(Usuario).filter(Usuario.username == login_data.username).first()
+    if not usuario:
+        return JSONResponse(status_code=401, content={"error": "Usuario no encontrado"})
+    
+    if not verificar_password(login_data.password, usuario.password_hash):
+        return JSONResponse(status_code=401, content={"error": "Contraseña incorrecta"})
+    
+    if not usuario.activo:
+        return JSONResponse(status_code=401, content={"error": "Usuario inactivo"})
+    
+    token = crear_token_acceso(data={"sub": usuario.username, "id": usuario.id})
+    
+    return {
+        "token": token,
+        "usuario": {
+            "id": usuario.id,
+            "username": usuario.username,
+            "nombre_completo": usuario.nombre_completo,
+            "email": usuario.email,
+            "permisos": {
+                "cronograma": usuario.permiso_cronograma,
+                "reportes": usuario.permiso_reportes,
+                "cotizaciones": usuario.permiso_cotizaciones,
+                "clientes": usuario.permiso_clientes,
+                "productos": usuario.permiso_productos,
+                "propuestas": usuario.permiso_propuestas,
+                "usuarios": usuario.permiso_usuarios
+            }
+        }
+    }
+
+@app.post("/usuarios")
+def crear_usuario(usuario: UsuarioCreate, db: Session = Depends(get_db)):
+    from models.usuario import Usuario
+    
+    # Verificar si ya existe
+    existe = db.query(Usuario).filter(Usuario.username == usuario.username).first()
+    if existe:
+        return JSONResponse(status_code=400, content={"error": "El usuario ya existe"})
+    
+    db_usuario = Usuario(
+        username=usuario.username,
+        email=usuario.email,
+        password_hash=hash_password(usuario.password),
+        nombre_completo=usuario.nombre_completo,
+        permiso_cronograma=usuario.permiso_cronograma,
+        permiso_reportes=usuario.permiso_reportes,
+        permiso_cotizaciones=usuario.permiso_cotizaciones,
+        permiso_clientes=usuario.permiso_clientes,
+        permiso_productos=usuario.permiso_productos,
+        permiso_propuestas=usuario.permiso_propuestas,
+        permiso_usuarios=usuario.permiso_usuarios
+    )
+    db.add(db_usuario)
+    db.commit()
+    db.refresh(db_usuario)
+    return {"mensaje": "Usuario creado correctamente", "id": db_usuario.id}
+
+@app.get("/usuarios")
+def listar_usuarios(db: Session = Depends(get_db)):
+    from models.usuario import Usuario
+    
+    usuarios = db.query(Usuario).all()
+    return [
+        {
+            "id": u.id,
+            "username": u.username,
+            "email": u.email,
+            "nombre_completo": u.nombre_completo,
+            "activo": u.activo,
+            "permisos": {
+                "cronograma": u.permiso_cronograma,
+                "reportes": u.permiso_reportes,
+                "cotizaciones": u.permiso_cotizaciones,
+                "clientes": u.permiso_clientes,
+                "productos": u.permiso_productos,
+                "propuestas": u.permiso_propuestas,
+                "usuarios": u.permiso_usuarios
+            }
+        }
+        for u in usuarios
+    ]
+
+@app.put("/usuarios/{usuario_id}")
+def actualizar_usuario(usuario_id: int, usuario: UsuarioCreate, db: Session = Depends(get_db)):
+    from models.usuario import Usuario
+    
+    db_usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
+    if not db_usuario:
+        return JSONResponse(status_code=404, content={"error": "Usuario no encontrado"})
+    
+    db_usuario.username = usuario.username
+    db_usuario.email = usuario.email
+    if usuario.password:
+        db_usuario.password_hash = hash_password(usuario.password)
+    db_usuario.nombre_completo = usuario.nombre_completo
+    db_usuario.permiso_cronograma = usuario.permiso_cronograma
+    db_usuario.permiso_reportes = usuario.permiso_reportes
+    db_usuario.permiso_cotizaciones = usuario.permiso_cotizaciones
+    db_usuario.permiso_clientes = usuario.permiso_clientes
+    db_usuario.permiso_productos = usuario.permiso_productos
+    db_usuario.permiso_propuestas = usuario.permiso_propuestas
+    db_usuario.permiso_usuarios = usuario.permiso_usuarios
+    
+    db.commit()
+    return {"mensaje": "Usuario actualizado correctamente"}
+
+@app.delete("/usuarios/{usuario_id}")
+def eliminar_usuario(usuario_id: int, db: Session = Depends(get_db)):
+    from models.usuario import Usuario
+    
+    usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
+    if not usuario:
+        return JSONResponse(status_code=404, content={"error": "Usuario no encontrado"})
+    db.delete(usuario)
+    db.commit()
+    return {"mensaje": "Usuario eliminado correctamente"}
+
+@app.put("/usuarios/{usuario_id}/toggle-activo")
+def toggle_activo_usuario(usuario_id: int, db: Session = Depends(get_db)):
+    from models.usuario import Usuario
+    
+    usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
+    if not usuario:
+        return JSONResponse(status_code=404, content={"error": "Usuario no encontrado"})
+    usuario.activo = not usuario.activo
+    db.commit()
+    return {"mensaje": f"Usuario {'activado' if usuario.activo else 'desactivado'}", "activo": usuario.activo}

@@ -454,6 +454,36 @@
     </style>
 </head>
 <body>
+   <script>
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = 'login.html';
+    }
+</script>
+<script src="validar_permisos.js"></script>
+<script>
+    const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+    const tienePermiso = usuario.permisos?.productos || usuario.username === 'admin';
+    
+    if (!tienePermiso) {
+        // Redirigir al primer módulo disponible sin alert
+        if (usuario.permisos?.cotizaciones) {
+            window.location.href = 'cotizaciones.html';
+        } else if (usuario.permisos?.clientes) {
+            window.location.href = 'clientes.html';
+        } else if (usuario.permisos?.cronograma) {
+            window.location.href = 'index.html';
+        } else if (usuario.permisos?.reportes) {
+            window.location.href = 'reportes.html';
+        } else if (usuario.permisos?.propuestas) {
+            window.location.href = 'propuestas.html';
+        }
+        // Si no tiene ningún permiso, no hace nada (página en blanco)
+    } else {
+        initPage('productos');
+    }
+</script>
+
     <div class="logo-header">
         <img src="/assets/logo.png" alt="Logo" class="logo-header-img">
     </div>

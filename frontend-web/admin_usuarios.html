@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrar Usuarios - Sistema ART</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-container {
+            max-width: 1400px;
+            margin: 30px auto;
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+        
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .btn-agregar {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-agregar:hover {
+            background: #059669;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            overflow-y: auto;
+        }
+        
+        .modal-content {
+            background: white;
+            max-width: 600px;
+            margin: 50px auto;
+            border-radius: 16px;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 25px;
+            border-bottom: 1px solid #e2e8f0;
+            background: #f8fafc;
+            border-radius: 16px 16px 0 0;
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            color: #1e293b;
+        }
+        
+        .close-modal {
+            font-size: 28px;
+            cursor: pointer;
+            color: #94a3b8;
+        }
+        
+        .close-modal:hover {
+            color: #ef4444;
+        }
+        
+        .modal-body {
+            padding: 25px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+        }
+        
+        .permisos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px;
+            margin-top: 10px;
+        }
+        
+        .permiso-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+        
+        .permiso-item input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .permiso-item label {
+            margin: 0;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: normal;
+            text-transform: none;
+            color: #1e293b;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            padding: 20px 25px;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .btn-guardar-modal {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        .btn-cancelar-modal {
+            background: #e2e8f0;
+            color: #475569;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        .table-usuarios {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .table-usuarios th,
+        .table-usuarios td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .table-usuarios th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .badge-activo {
+            background: #10b98120;
+            color: #10b981;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .badge-inactivo {
+            background: #ef444420;
+            color: #ef4444;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .btn-accion-usuario {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        
+        .btn-accion-usuario:hover {
+            background: #f1f5f9;
+        }
+        
+        .permisos-cell {
+            font-size: 11px;
+            max-width: 200px;
+        }
+        
+        .permiso-badge {
+            display: inline-block;
+            background: #e2e8f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin: 2px;
+            font-size: 10px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 30px;
+            color: #64748b;
+        }
+        
+        .logo-header {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: white;
+            padding: 8px 16px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .logo-header-img {
+            height: 35px;
+            width: auto;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <script>
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = 'login.html';
+    }
+</script>
+<script src="validar_permisos.js"></script>
+<script>
+    const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+    if (usuario.username !== 'admin' && !usuario.permisos?.usuarios) {
+        if (usuario.permisos?.cotizaciones) {
+            window.location.href = 'cotizaciones.html';
+        } else if (usuario.permisos?.clientes) {
+            window.location.href = 'clientes.html';
+        } else if (usuario.permisos?.cronograma) {
+            window.location.href = 'index.html';
+        } else {
+            alert('No tienes permiso para acceder a ningún módulo');
+            cerrarSesion();
+        }
+    } else {
+        initPage('usuarios');
+    }
+</script>
+    <script src="validar_permisos.js"></script>
+  <script>
+    // No verificamos aquí, dejamos que initPage maneje la redirección
+    initPage('cronograma');
+  </script>
+    <script src="validar_permisos.js"></script>
+    <script>
+        initPage('usuarios');
+    </script>
+
+    <div class="logo-header">
+        <img src="/assets/logo.png" alt="Logo" class="logo-header-img">
+    </div>
+    
+    <div class="app-container">
+        <div class="main-content">
+            <div class="tabs">
+                <button class="tab" onclick="window.location.href='index.html'">📋 Cronograma</button>
+                <button class="tab" onclick="window.location.href='reportes.html'">📊 Reportes</button>
+                <button class="tab" onclick="window.location.href='cotizaciones.html'">💰 Cotizaciones</button>
+                <button class="tab" onclick="window.location.href='clientes.html'">👥 Clientes</button>
+                <button class="tab" onclick="window.location.href='productos.html'">📦 Productos</button>
+                <button class="tab" onclick="window.location.href='propuestas.html'">📄 Propuestas</button>
+                <button class="tab active" style="background: #8b5cf6;" onclick="window.location.href='admin_usuarios.html'">👑 Admin</button>
+                <button class="tab" onclick="cerrarSesion()" style="background: #ef4444; color: white; margin-left: auto;">🔒 Cerrar Sesión</button>
+            </div>
+
+            <div class="admin-container">
+                <div class="admin-header">
+                    <h2>👑 Administración de Usuarios</h2>
+                    <button class="btn-agregar" id="btnAbrirModal">+ Nuevo Usuario</button>
+                </div>
+
+                <div id="usuariosLista">
+                    <div class="loading">Cargando usuarios...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="usuarioModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Nuevo Usuario</h3>
+                <span class="close-modal" id="cerrarModalBtn">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="usuarioForm">
+                    <input type="hidden" id="usuarioId">
+                    <div class="form-group">
+                        <label>Usuario *</label>
+                        <input type="text" id="username" required placeholder="ej: juan.perez">
+                    </div>
+                    <div class="form-group">
+                        <label>Nombre Completo</label>
+                        <input type="text" id="nombre_completo" placeholder="Nombre completo">
+                    </div>
+                    <div class="form-group">
+                        <label>Email *</label>
+                        <input type="email" id="email" required placeholder="correo@empresa.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Contraseña <span id="passwordRequired">*</span></label>
+                        <input type="password" id="password" placeholder="Mínimo 6 caracteres">
+                    </div>
+                    
+                    <label style="font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 10px; display: block;">Permisos (módulos a los que tendrá acceso)</label>
+                    <div class="permisos-grid">
+                        <div class="permiso-item">
+                            <input type="checkbox" id="permiso_cronograma"> <label>Cronograma</label>
+                        </div>
+                        <div class="permiso-item">
+                            <input type="checkbox" id="permiso_reportes"> <label>Reportes</label>
+                        </div>
+                        <div class="permiso-item">
+                            <input type="checkbox" id="permiso_cotizaciones"> <label>Cotizaciones</label>
+                        </div>
+                        <div class="permiso-item">
+                            <input type="checkbox" id="permiso_clientes"> <label>Clientes</label>
+                        </div>
+                        <div class="permiso-item">
+                            <input type="checkbox" id="permiso_productos"> <label>Productos</label>
+                        </div>
+                        <div class="permiso-item">
+                            <input type="checkbox" id="permiso_propuestas"> <label>Propuestas</label>
+                        </div>
+                        <div class="permiso-item">
+                            <input type="checkbox" id="permiso_usuarios"> <label>Administrar Usuarios</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancelar-modal" id="btnCancelarModal">Cancelar</button>
+                <button class="btn-guardar-modal" id="btnGuardarUsuario">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000';
+        let usuarios = [];
+        let editandoId = null;
+        
+        const tokenUsuario = localStorage.getItem('token');
+        const usuarioActual = JSON.parse(localStorage.getItem('usuario') || '{}');
+        
+        if (!tokenUsuario) {
+            window.location.href = 'login.html';
+        }
+        
+        if (!usuarioActual.permisos?.usuarios && usuarioActual.username !== 'admin') {
+            alert('❌ No tienes permiso para acceder a esta página');
+            window.location.href = 'index.html';
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarUsuarios();
+            
+            document.getElementById('btnAbrirModal').addEventListener('click', abrirModalNuevo);
+            document.getElementById('cerrarModalBtn').addEventListener('click', cerrarModal);
+            document.getElementById('btnCancelarModal').addEventListener('click', cerrarModal);
+            document.getElementById('btnGuardarUsuario').addEventListener('click', guardarUsuario);
+        });
+        
+        async function cargarUsuarios() {
+            try {
+                const response = await fetch(`${API_URL}/usuarios`, {
+                    headers: { 'Authorization': `Bearer ${tokenUsuario}` }
+                });
+                usuarios = await response.json();
+                renderizarLista();
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('usuariosLista').innerHTML = '<div class="loading">Error al cargar usuarios</div>';
+            }
+        }
+        
+        function renderizarLista() {
+            const container = document.getElementById('usuariosLista');
+            
+            if (usuarios.length === 0) {
+                container.innerHTML = '<div class="loading">No hay usuarios registrados</div>';
+                return;
+            }
+            
+            container.innerHTML = `
+                <table class="table-usuarios">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Usuario</th>
+                            <th>Nombre</th>
+                            <th>Email</th>
+                            <th>Permisos</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </table>
+                    </thead>
+                    <tbody>
+                        ${usuarios.map(u => `
+                            <tr>
+                                <td>${u.id}</td>
+                                <td><strong>${u.username}</strong>${u.username === 'admin' ? ' 👑' : ''}</td>
+                                <td>${u.nombre_completo || '-'}</td>
+                                <td>${u.email}</td>
+                                <td class="permisos-cell">
+                                    ${Object.entries(u.permisos || {}).filter(([k,v]) => v===true).map(([k]) => `<span class="permiso-badge">${k}</span>`).join('') || '-'}
+                                 </td>
+                                <td>
+                                    <span class="${u.activo ? 'badge-activo' : 'badge-inactivo'}">
+                                        ${u.activo ? 'Activo' : 'Inactivo'}
+                                    </span>
+                                 </td>
+                                <td>
+                                    <button class="btn-accion-usuario" onclick="editarUsuario(${u.id})" title="Editar">✏️</button>
+                                    <button class="btn-accion-usuario" onclick="toggleActivo(${u.id}, ${u.activo})" title="${u.activo ? 'Desactivar' : 'Activar'}">
+                                        ${u.activo ? '🔴' : '🟢'}
+                                    </button>
+                                    ${u.username !== 'admin' ? `<button class="btn-accion-usuario" onclick="eliminarUsuario(${u.id})" title="Eliminar">🗑️</button>` : ''}
+                                 </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+        
+        function abrirModalNuevo() {
+            editandoId = null;
+            document.getElementById('modalTitle').textContent = 'Nuevo Usuario';
+            document.getElementById('usuarioForm').reset();
+            document.getElementById('usuarioId').value = '';
+            document.getElementById('passwordRequired').textContent = '*';
+            document.getElementById('password').required = true;
+            
+            document.querySelectorAll('#usuarioForm input[type="checkbox"]').forEach(cb => cb.checked = false);
+            
+            document.getElementById('usuarioModal').style.display = 'block';
+        }
+        
+        async function editarUsuario(id) {
+            const usuarioEdit = usuarios.find(u => u.id === id);
+            if (!usuarioEdit) return;
+            
+            editandoId = id;
+            document.getElementById('modalTitle').textContent = 'Editar Usuario';
+            document.getElementById('usuarioId').value = usuarioEdit.id;
+            document.getElementById('username').value = usuarioEdit.username;
+            document.getElementById('nombre_completo').value = usuarioEdit.nombre_completo || '';
+            document.getElementById('email').value = usuarioEdit.email;
+            document.getElementById('password').value = '';
+            document.getElementById('passwordRequired').textContent = '(dejar vacío para no cambiar)';
+            document.getElementById('password').required = false;
+            
+            document.getElementById('permiso_cronograma').checked = usuarioEdit.permisos?.cronograma || false;
+            document.getElementById('permiso_reportes').checked = usuarioEdit.permisos?.reportes || false;
+            document.getElementById('permiso_cotizaciones').checked = usuarioEdit.permisos?.cotizaciones || false;
+            document.getElementById('permiso_clientes').checked = usuarioEdit.permisos?.clientes || false;
+            document.getElementById('permiso_productos').checked = usuarioEdit.permisos?.productos || false;
+            document.getElementById('permiso_propuestas').checked = usuarioEdit.permisos?.propuestas || false;
+            document.getElementById('permiso_usuarios').checked = usuarioEdit.permisos?.usuarios || false;
+            
+            document.getElementById('usuarioModal').style.display = 'block';
+        }
+        
+        async function guardarUsuario() {
+            const data = {
+                username: document.getElementById('username').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                password: document.getElementById('password').value,
+                nombre_completo: document.getElementById('nombre_completo').value,
+                permiso_cronograma: document.getElementById('permiso_cronograma').checked,
+                permiso_reportes: document.getElementById('permiso_reportes').checked,
+                permiso_cotizaciones: document.getElementById('permiso_cotizaciones').checked,
+                permiso_clientes: document.getElementById('permiso_clientes').checked,
+                permiso_productos: document.getElementById('permiso_productos').checked,
+                permiso_propuestas: document.getElementById('permiso_propuestas').checked,
+                permiso_usuarios: document.getElementById('permiso_usuarios').checked
+            };
+            
+            if (!data.username || !data.email) {
+                alert('❌ Usuario y email son obligatorios');
+                return;
+            }
+            
+            if (!editandoId && !data.password) {
+                alert('❌ Contraseña es obligatoria');
+                return;
+            }
+            
+            try {
+                let url = `${API_URL}/usuarios`;
+                let method = 'POST';
+                
+                if (editandoId) {
+                    url = `${API_URL}/usuarios/${editandoId}`;
+                    method = 'PUT';
+                }
+                
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${tokenUsuario}`
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    alert(editandoId ? '✅ Usuario actualizado' : '✅ Usuario creado');
+                    cerrarModal();
+                    cargarUsuarios();
+                } else {
+                    const error = await response.json();
+                    alert('❌ Error: ' + JSON.stringify(error));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error de conexión');
+            }
+        }
+        
+        async function toggleActivo(id, activo) {
+            const accion = activo ? 'desactivar' : 'activar';
+            if (!confirm(`¿${accion} este usuario?`)) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/usuarios/${id}/toggle-activo`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${tokenUsuario}` }
+                });
+                
+                if (response.ok) {
+                    alert(`✅ Usuario ${activo ? 'desactivado' : 'activado'}`);
+                    cargarUsuarios();
+                } else {
+                    alert('❌ Error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error de conexión');
+            }
+        }
+        
+        async function eliminarUsuario(id) {
+            if (!confirm('¿Eliminar este usuario permanentemente?')) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/usuarios/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${tokenUsuario}` }
+                });
+                
+                if (response.ok) {
+                    alert('✅ Usuario eliminado');
+                    cargarUsuarios();
+                } else {
+                    alert('❌ Error al eliminar');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error de conexión');
+            }
+        }
+        
+        function cerrarModal() {
+            document.getElementById('usuarioModal').style.display = 'none';
+        }
+        
+        function cerrarSesion() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('usuario');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>

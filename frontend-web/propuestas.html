@@ -386,14 +386,40 @@
     </style>
 </head>
 <body>
-    <!-- Logo fijo en esquina superior izquierda (mismo que index) -->
+<script>
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = 'login.html';
+    }
+</script>
+<script src="validar_permisos.js"></script>
+<script>
+    const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+    const tienePermiso = usuario.permisos?.propuestas || usuario.username === 'admin';
+    
+    if (!tienePermiso) {
+        if (usuario.permisos?.cotizaciones) {
+            window.location.href = 'cotizaciones.html';
+        } else if (usuario.permisos?.clientes) {
+            window.location.href = 'clientes.html';
+        } else if (usuario.permisos?.productos) {
+            window.location.href = 'productos.html';
+        } else if (usuario.permisos?.cronograma) {
+            window.location.href = 'index.html';
+        } else if (usuario.permisos?.reportes) {
+            window.location.href = 'reportes.html';
+        }
+    } else {
+        initPage('propuestas');
+    }
+</script>
+
     <div class="logo-header">
         <img src="/assets/logo.png" alt="Advanced Radiotherapy Corporation" class="logo-header-img">
     </div>
 
     <div class="app-container">
         <div class="main-content">
-            <!-- Mismas tabs que en index -->
             <div class="tabs">
                 <button class="tab" onclick="window.location.href='index.html'">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px; vertical-align: middle;">
@@ -453,9 +479,7 @@
             <div class="propuestas-container">
                 <h2 style="margin-top: 0; color: #1e293b;">Propuestas Comerciales</h2>
                 
-                <!-- Formulario de propuesta -->
                 <form id="propuestaForm">
-                    <!-- Sección: Información General -->
                     <div class="form-section-propuesta">
                         <h3>Información General</h3>
                         <div class="form-grid-propuesta">
@@ -487,7 +511,6 @@
                         </div>
                     </div>
 
-                    <!-- Sección: Cliente -->
                     <div class="form-section-propuesta">
                         <h3>Información del Cliente</h3>
                         <div class="form-grid-propuesta">
@@ -520,7 +543,6 @@
                         </div>
                     </div>
 
-                    <!-- Sección: Logo Personalizable (esquina superior derecha) -->
                     <div class="form-section-propuesta">
                         <h3>Logo Personalizable (Esquina Superior Derecha)</h3>
                         <div class="form-grid-propuesta">
@@ -533,7 +555,6 @@
                         </div>
                     </div>
 
-                    <!-- Sección: Productos/Equipos -->
                     <div class="form-section-propuesta">
                         <h3>Productos / Equipos</h3>
                         <table class="productos-edicion-table" id="productosTable">
@@ -557,7 +578,7 @@
                                     <td class="producto-iva">$0.00</td>
                                     <td class="producto-total">$0.00</td>
                                     <td><button type="button" class="btn-eliminar-fila" onclick="eliminarFilaProducto(this)">🗑️</button></td>
-                                tr
+                                </tr>
                             </tbody>
                             <tfoot>
                                 <tr>
@@ -575,7 +596,6 @@
                         </div>
                     </div>
 
-                    <!-- Sección: Notas y Términos -->
                     <div class="form-section-propuesta">
                         <h3>Notas y Términos</h3>
                         <div class="form-field">
@@ -594,7 +614,6 @@
                     </div>
                 </form>
 
-                <!-- Listado de propuestas guardadas -->
                 <div class="table-container" style="margin-top: 30px;">
                     <h3>Propuestas Registradas</h3>
                     <table id="propuestasTable">
@@ -628,7 +647,6 @@
         </div>
     </div>
 
-    <!-- Modal para ver propuesta completa -->
     <div id="detalleModal" class="modal">
         <div class="modal-content" style="max-width: 900px;">
             <div class="modal-header">

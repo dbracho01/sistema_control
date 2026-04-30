@@ -412,3 +412,9 @@ function getEstadoGarantia(dias) {
     if (dias <= 30) return { clase: 'proximo', texto: 'Por vencer' };
     return { clase: 'vigente', texto: 'Vigente' };
 }
+// Función para cerrar sesión
+function cerrarSesion() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('usuario');
+    window.location.href = 'login.html';
+}function cerrarSesion() { localStorage.removeItem("token"); localStorage.removeItem("usuario"); window.location.href = "login.html"; }
