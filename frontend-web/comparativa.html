@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparativa de Equipos - Sistema ART</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .comparativa-container {
+            max-width: 1400px;
+            margin: 30px auto;
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+        
+        .comparativa-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .table-comparativa {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .table-comparativa th,
+        .table-comparativa td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .table-comparativa th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #1e293b;
+            position: sticky;
+            top: 0;
+        }
+        
+        .table-comparativa tr:hover {
+            background: #f1f5f9;
+        }
+        
+        .kpi-bueno {
+            color: #10b981;
+            font-weight: bold;
+        }
+        
+        .kpi-regular {
+            color: #f59e0b;
+            font-weight: bold;
+        }
+        
+        .kpi-malo {
+            color: #ef4444;
+            font-weight: bold;
+        }
+        
+        .btn-actualizar {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        .btn-actualizar:hover {
+            background: #2563eb;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 30px;
+            color: #64748b;
+        }
+        
+        .logo-header {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: white;
+            padding: 8px 16px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .logo-header-img {
+            height: 35px;
+            width: auto;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="logo-header">
+        <img src="/assets/logo.png" alt="Logo" class="logo-header-img">
+    </div>
+
+    <div class="app-container">
+        <div class="main-content">
+            <div class="tabs">
+                <button class="tab" onclick="window.location.href='index.html'">📋 Cronograma</button>
+                <button class="tab" onclick="window.location.href='reportes.html'">📊 Reportes</button>
+                <button class="tab" onclick="window.location.href='cotizaciones.html'">💰 Cotizaciones</button>
+                <button class="tab" onclick="window.location.href='clientes.html'">👥 Clientes</button>
+                <button class="tab" onclick="window.location.href='productos.html'">📦 Productos</button>
+                <button class="tab" onclick="window.location.href='propuestas.html'">📄 Propuestas</button>
+                <button class="tab active" style="background: #8b5cf6;" onclick="window.location.href='comparativa.html'">📈 Comparativa</button>
+                <button class="tab" onclick="window.location.href='admin_usuarios.html'" style="background: #d946ef; color: white;">👑 Admin</button>
+                <button class="tab" onclick="cerrarSesion()" style="background: #ef4444; color: white; margin-left: auto;">🔒 Cerrar Sesión</button>
+            </div>
+
+            <div class="comparativa-container">
+                <div class="comparativa-header">
+                    <h2>📈 Comparativa de Rendimiento de Equipos</h2>
+                    <button class="btn-actualizar" onclick="cargarComparativa()">🔄 Actualizar</button>
+                </div>
+
+                <div id="comparativaBody">
+                    <div class="loading">Cargando datos de equipos...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000';
+        
+        // Verificar autenticación
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = 'login.html';
+        }
+        
+        function getEstadoKPI(valor, tipo) {
+            if (tipo === 'mtbf') {
+                if (valor === 0) return 'kpi-malo';
+                if (valor < 100) return 'kpi-malo';
+                if (valor < 200) return 'kpi-regular';
+                return 'kpi-bueno';
+            }
+            if (tipo === 'mttr') {
+                if (valor === 0) return 'kpi-bueno';
+                if (valor > 8) return 'kpi-malo';
+                if (valor > 4) return 'kpi-regular';
+                return 'kpi-bueno';
+            }
+            if (tipo === 'disponibilidad') {
+                if (valor === 0) return 'kpi-malo';
+                if (valor < 85) return 'kpi-malo';
+                if (valor < 95) return 'kpi-regular';
+                return 'kpi-bueno';
+            }
+            if (tipo === 'roi') {
+                if (valor === 0) return 'kpi-regular';
+                if (valor < 50) return 'kpi-malo';
+                if (valor < 150) return 'kpi-regular';
+                return 'kpi-bueno';
+            }
+            return '';
+        }
+        
+        async function cargarComparativa() {
+            const container = document.getElementById('comparativaBody');
+            container.innerHTML = '<div class="loading">Cargando datos de equipos...</div>';
+            
+            try {
+                const response = await fetch(`${API_URL}/indicadores/todos-equipos`);
+                const equipos = await response.json();
+                
+                if (equipos.length === 0) {
+                    container.innerHTML = '<div class="loading">No hay equipos registrados</div>';
+                    return;
+                }
+                
+                container.innerHTML = `
+                    <table class="table-comparativa">
+                        <thead>
+                            <tr>
+                                <th>Equipo</th>
+                                <th>Cliente</th>
+                                <th>MTBF (horas)</th>
+                                <th>MTTR (horas)</th>
+                                <th>Disponibilidad (%)</th>
+                                <th>ROI (%)</th>
+                                <th>Total Fallos</th>
+                                <th>Horas Parada</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${equipos.map(e => `
+                                <tr>
+                                    <td><strong>${e.nombre}</strong></td>
+                                    <td>${e.cliente}</td>
+                                    <td class="${getEstadoKPI(e.mtbf, 'mtbf')}">${e.mtbf} hrs</td>
+                                    <td class="${getEstadoKPI(e.mttr, 'mttr')}">${e.mttr} hrs</td>
+                                    <td class="${getEstadoKPI(e.disponibilidad, 'disponibilidad')}">${e.disponibilidad}%</td>
+                                    <td class="${getEstadoKPI(e.roi, 'roi')}">${e.roi}%</td>
+                                    <td>${e.total_fallos}</td>
+                                    <td>${e.total_horas_parada} hrs</td>
+                                    <td>
+                                        <button class="btn-accion ver" onclick="verDetalleEquipo(${e.id})">👁️ Ver</button>
+                                        <button class="btn-accion indicadores" onclick="verIndicadoresEquipo(${e.id})">📊 Indicadores</button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                    <div style="margin-top: 20px; padding: 15px; background: #f8fafc; border-radius: 12px;">
+                        <h4>📌 Leyenda de colores:</h4>
+                        <p><span class="kpi-bueno">● Óptimo</span> - <span class="kpi-regular">● En riesgo</span> - <span class="kpi-malo">● Crítico</span></p>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error:', error);
+                container.innerHTML = '<div class="loading">Error al cargar datos</div>';
+            }
+        }
+        
+        function verDetalleEquipo(id) {
+            window.location.href = `index.html?ver=${id}`;
+        }
+        
+        function verIndicadoresEquipo(id) {
+            window.open(`#`, '_blank');
+            // Reutilizar la función existente
+            if (typeof verIndicadores === 'function') {
+                verIndicadores(id);
+            }
+        }
+        
+        function cerrarSesion() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('usuario');
+            window.location.href = 'login.html';
+        }
+        
+        document.addEventListener('DOMContentLoaded', cargarComparativa);
+    </script>
+</body>
+</html>

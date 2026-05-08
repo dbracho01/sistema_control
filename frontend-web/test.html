@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test API Equipos</title>
+</head>
+<body>
+    <h1>Prueba de conexión con el backend</h1>
+    <button onclick="cargarEquipos()">Cargar Equipos</button>
+    <pre id="resultado" style="margin-top: 20px; background: #f0f0f0; padding: 10px;"></pre>
+    
+    <script>
+        const API_URL = 'http://127.0.0.1:8000';
+        
+        async function cargarEquipos() {
+            const resultado = document.getElementById('resultado');
+            resultado.innerHTML = 'Cargando...';
+            
+            try {
+                const response = await fetch(`${API_URL}/equipos`);
+                const data = await response.json();
+                resultado.innerHTML = JSON.stringify(data, null, 2);
+                console.log('Equipos cargados:', data.length);
+            } catch (error) {
+                resultado.innerHTML = 'Error: ' + error.message;
+                console.error('Error:', error);
+            }
+        }
+        
+        // Cargar automáticamente al abrir la página
+        cargarEquipos();
+    </script>
+</body>
+</html>
+

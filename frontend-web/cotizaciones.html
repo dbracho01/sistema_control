@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Cotizaciones</title>
     <link rel="stylesheet" href="style.css">
+    <script src="validar_permisos.js"></script>
     <style>
         .cotizaciones-container {
             max-width: 1200px;
@@ -175,118 +176,20 @@
             border-color: var(--gray);
         }
         
-        /* ===== ESTILOS CORREGIDOS PARA BOTONES DE ACCIÓN ===== */
         .btn-accion {
             background: none;
             border: none;
-            font-size: 13px;
+            font-size: 18px;
             cursor: pointer;
             margin: 0 4px;
-            padding: 6px 12px;
-            border-radius: 6px;
-            transition: all 0.2s;
-            font-weight: 500;
+            padding: 5px;
+            border-radius: 4px;
+            transition: background 0.2s;
         }
         
         .btn-accion:hover {
-            filter: brightness(0.9);
+            background: var(--light);
         }
-        
-        .btn-accion.ver {
-            background: #3b82f6;
-            color: white;
-        }
-        
-        .btn-accion.ver:hover {
-            background: #2563eb;
-        }
-        
-        .btn-accion.editar {
-            background: #f59e0b;
-            color: white;
-        }
-        
-        .btn-accion.editar:hover {
-            background: #d97706;
-        }
-        
-        .btn-accion.eliminar {
-            background: #ef4444;
-            color: white;
-        }
-        
-        .btn-accion.eliminar:hover {
-            background: #dc2626;
-        }
-        /* ===== FIN ESTILOS CORREGIDOS ===== */
-
-                /* ===== ESTILOS PARA CELDA DE ACCIONES (igual al cronograma) ===== */
-        .acciones-cell {
-            white-space: nowrap;
-        }
-
-        .acciones-cell .btn-accion {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: transparent;
-            border: none;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            margin: 0 4px;
-            padding: 6px 12px;
-            border-radius: 8px;
-            transition: all 0.2s ease;
-            font-family: inherit;
-        }
-
-        /* Botón Ver */
-        .acciones-cell .btn-accion.ver {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-            color: white;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        }
-
-        .acciones-cell .btn-accion.ver:hover {
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(59,130,246,0.3);
-        }
-
-        /* Botón Editar */
-        .acciones-cell .btn-accion.editar {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-            color: white;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        }
-
-        .acciones-cell .btn-accion.editar:hover {
-            background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(245,158,11,0.3);
-        }
-
-        /* Botón Eliminar */
-        .acciones-cell .btn-accion.eliminar {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            color: white;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        }
-
-        .acciones-cell .btn-accion.eliminar:hover {
-            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(239,68,68,0.3);
-        }
-
-        /* Efecto de clic */
-        .acciones-cell .btn-accion:active {
-            transform: translateY(1px);
-        }
-        /* ===== FIN ESTILOS ACCIONES ===== */
-
-
         
         .table-container {
             margin-top: 30px;
@@ -423,41 +326,6 @@
     </style>
 </head>
 <body>
-    <script>
-    const token = localStorage.getItem('token');
-    if (!token) {
-        window.location.href = 'login.html';
-    }
-   <script>
-    const token = localStorage.getItem('token');
-    if (!token) {
-        window.location.href = 'login.html';
-    }
-</script>
-<script src="validar_permisos.js"></script>
-<script>
-    const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
-    const tienePermiso = usuario.permisos?.cotizaciones || usuario.username === 'admin';
-    
-    if (!tienePermiso) {
-        // Redirigir al primer módulo disponible sin alert
-        if (usuario.permisos?.clientes) {
-            window.location.href = 'clientes.html';
-        } else if (usuario.permisos?.productos) {
-            window.location.href = 'productos.html';
-        } else if (usuario.permisos?.cronograma) {
-            window.location.href = 'index.html';
-        } else if (usuario.permisos?.reportes) {
-            window.location.href = 'reportes.html';
-        } else if (usuario.permisos?.propuestas) {
-            window.location.href = 'propuestas.html';
-        }
-        // Si no tiene ningún permiso, no hace nada (página en blanco)
-    } else {
-        initPage('cotizaciones');
-    }
-</script>
-
     <div class="logo-header">
         <img src="/assets/logo.png" alt="Logo" class="logo-header-img">
     </div>
@@ -479,18 +347,9 @@
                 <button class="tab active" onclick="window.location.href='cotizaciones.html'">💰 Cotizaciones</button>
                 <button class="tab" onclick="window.location.href='clientes.html'">👥 Clientes</button>
                 <button class="tab" onclick="window.location.href='productos.html'">📦 Productos</button>
-                 <button class="tab" onclick="window.location.href='propuestas.html'">
-                 
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px; vertical-align: middle;">
-                     <path d="M4 4h16v16H4z"/>
-                     <line x1="8" y1="8" x2="16" y2="8"/>
-                     <line x1="8" y1="12" x2="16" y2="12"/>
-                     <line x1="8" y1="16" x2="12" y2="16"/>
-                     <circle cx="17" cy="17" r="2" fill="currentColor"/>
-                   </svg>
-                      Propuestas
-                    </button> 
-
+                <button class="tab" onclick="window.location.href='propuestas.html'">📄 Propuestas</button>
+                <button class="tab" onclick="window.location.href='admin_usuarios.html'" style="background: #8b5cf6; color: white;">👑 Admin</button>
+                <button class="tab" onclick="cerrarSesion()" style="background: #ef4444; color: white; margin-left: auto;">🔒 Cerrar Sesión</button>
             </div>
 
             <div class="cotizaciones-container">
@@ -551,9 +410,8 @@
                                 <tr class="producto-row">
                                     <td><input type="text" class="producto-nombre" placeholder="Nombre del producto"></td>
                                     <td><input type="text" class="producto-referencia" placeholder="Referencia"></td>
-                                    <td><input type="number" class="producto-cantidad" value="1" min="1" style="width: 80px;">\n        <td><input type="number" class="producto-precio" step="0.01" value="0" style="width: 100px;"></td>
-                                    <td class="producto-subtotal">$0.00</td>
-                                    <td><button type="button" class="btn-accion eliminar" onclick="eliminarFilaProducto(this)">🗑️ Eliminar</button></td>
+                                    <td><input type="number" class="producto-cantidad" value="1" min="1" style="width: 80px;">\n                                    <td><input type="number" class="producto-precio" step="0.01" value="0" style="width: 100px;"></td>
+                                    <td class="producto-subtotal">$0.00\n                                    <td class="producto-subtotal">$0.00\n                                    <td><button type="button" class="btn-accion" onclick="eliminarFilaProducto(this)">🗑️</button></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -609,7 +467,7 @@
                             </tr>
                         </thead>
                         <tbody id="cotizacionesBody">
-                            <tr><td colspan="7" class="loading">Cargando cotizaciones......</td></tr>
+                            <tr><td colspan="7" class="loading">Cargando cotizaciones...</td></tr>
                         </tbody>
                     </table>
                     
@@ -630,6 +488,13 @@
     <script>
         function verCotizacion(id) {
             window.open(`http://127.0.0.1:8000/ver-cotizacion/${id}`, '_blank');
+        }
+    </script>
+    <script>
+        function cerrarSesion() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('usuario');
+            window.location.href = 'login.html';
         }
     </script>
 </body>

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Productos</title>
+    <script src="validar_permisos.js"></script>
     <link rel="stylesheet" href="style.css">
     <style>
         .productos-container {
@@ -505,7 +506,7 @@
                 <button class="tab" onclick="window.location.href='cotizaciones.html'">💰 Cotizaciones</button>
                 <button class="tab" onclick="window.location.href='clientes.html'">👥 Clientes</button>
                 <button class="tab active" onclick="window.location.href='productos.html'">📦 Productos</button>
-                 <button class="tab" onclick="window.location.href='propuestas.html'">
+                                  <button class="tab" onclick="window.location.href='propuestas.html'">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px; vertical-align: middle;">
                   <path d="M4 4h16v16H4z"/>
                   <line x1="8" y1="8" x2="16" y2="8"/>
@@ -515,7 +516,7 @@
                </svg>
                 Propuestas
                </button>
-
+               <button class="tab" onclick="cerrarSesion()" style="background: #ef4444; color: white; margin-left: auto;">🔒 Cerrar Sesión
 
             </div>
 

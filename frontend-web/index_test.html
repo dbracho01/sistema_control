@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Equipos</title>
+</head>
+<body>
+    <h1>Lista de Equipos</h1>
+    <div id="equipos"></div>
+    
+    <script>
+        const API_URL = 'http://127.0.0.1:8000';
+        
+        async function cargar() {
+            const response = await fetch(`${API_URL}/equipos`);
+            const equipos = await response.json();
+            const div = document.getElementById('equipos');
+            div.innerHTML = '<pre>' + JSON.stringify(equipos, null, 2) + '</pre>';
+        }
+        cargar();
+    </script>
+</body>
+</html>

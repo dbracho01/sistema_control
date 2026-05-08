@@ -1,0 +1,359 @@
+const API_URL = 'http://127.0.0.1:8000';
+
+let todosLosEquipos = [];
+let paginaActual = 1;
+const equiposPorPagina = 5;
+let equipoEnEdicion = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+    cargarEquipos();
+    cargarClientesEnSelector();
+    
+    document.querySelector('.close-modal')?.addEventListener('click', cerrarModal);
+    window.addEventListener('click', (e) => {
+        const modal = document.getElementById('detalleModal');
+        if (e.target === modal) cerrarModal();
+    });
+    
+    document.getElementById('prevPage').addEventListener('click', () => {
+        if (paginaActual > 1) {
+            paginaActual--;
+            renderizarPagina();
+        }
+    });
+    
+    document.getElementById('nextPage').addEventListener('click', () => {
+        const totalPaginas = Math.ceil(todosLosEquipos.length / equiposPorPagina);
+        if (paginaActual < totalPaginas) {
+            paginaActual++;
+            renderizarPagina();
+        }
+    });
+
+    const importado = document.getElementById('importado');
+    const nacionalizado = document.getElementById('nacionalizado');
+    
+    if (importado && nacionalizado) {
+        importado.addEventListener('change', function() {
+            if (this.checked) nacionalizado.checked = false;
+        });
+        nacionalizado.addEventListener('change', function() {
+            if (this.checked) importado.checked = false;
+        });
+    }
+});
+
+document.getElementById('equipoForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const selectCliente = document.getElementById('cliente_id_select');
+    const inputCliente = document.getElementById('cliente_nombre_input');
+    const clienteId = selectCliente?.value ? parseInt(selectCliente.value) : null;
+    const clienteNombre = inputCliente?.value.trim() || '';
+    
+    if (!clienteId && !clienteNombre) {
+        alert('❌ Debe seleccionar un cliente o escribir uno nuevo');
+        return;
+    }
+    
+    const equipo = {
+        equipo: document.getElementById('equipo').value,
+        cliente: clienteNombre,
+        cliente_id: clienteId,
+        ubicacion: document.getElementById('ubicacion').value,
+        garantia_inicio: document.getElementById('garantia_inicio').value,
+        garantia_fin: document.getElementById('garantia_fin').value,
+        mtto_inicio: document.getElementById('mtto_inicio').value || null,
+        mtto_fin: null,
+        importado: document.getElementById('importado').checked,
+        nacionalizado: document.getElementById('nacionalizado').checked,
+        mtos_pendientes: parseInt(document.getElementById('mtos_pendientes').value) || 0,
+        mtos_realizados: parseInt(document.getElementById('mtos_realizados').value) || 0,
+        observaciones: document.getElementById('observaciones').value || ''
+    };
+
+    try {
+        const url = equipoEnEdicion ? `${API_URL}/equipos/${equipoEnEdicion}` : `${API_URL}/equipos`;
+        const method = equipoEnEdicion ? 'PUT' : 'POST';
+        
+        const response = await fetch(url, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(equipo)
+        });
+
+        if (response.ok) {
+            alert(equipoEnEdicion ? '✅ Equipo actualizado' : '✅ Equipo guardado');
+            document.getElementById('equipoForm').reset();
+            equipoEnEdicion = null;
+            document.querySelector('.btn-guardar').textContent = 'Guardar Equipo';
+            await cargarEquipos();
+            paginaActual = 1;
+            renderizarPagina();
+        } else {
+            const error = await response.json();
+            alert('❌ Error: ' + JSON.stringify(error));
+        }
+    } catch (error) {
+        alert('❌ Error de conexión');
+        console.error(error);
+    }
+});
+
+async function cargarEquipos() {
+    try {
+        const response = await fetch(`${API_URL}/equipos`);
+        const data = await response.json();
+        todosLosEquipos = Array.isArray(data) ? data : [];
+        
+        let stats = { vigente: 0, proximo: 0, vencido: 0 };
+        todosLosEquipos.forEach(equipo => {
+            const dias = calcularDiasRestantes(equipo.garantia_fin);
+            if (dias < 0) stats.vencido++;
+            else if (dias <= 30) stats.proximo++;
+            else stats.vigente++;
+        });
+
+        document.getElementById('stats-vigente').textContent = stats.vigente;
+        document.getElementById('stats-proximo').textContent = stats.proximo;
+        document.getElementById('stats-vencido').textContent = stats.vencido;
+        
+        paginaActual = 1;
+        renderizarPagina();
+    } catch (error) {
+        console.error(error);
+        document.getElementById('cronogramaBody').innerHTML = '<tr><td colspan="11" class="loading">Error al cargar equipos</td></tr>';
+    }
+}
+
+function renderizarPagina() {
+    const tbody = document.getElementById('cronogramaBody');
+    if (!tbody) return;
+    
+    const totalPaginas = Math.ceil(todosLosEquipos.length / equiposPorPagina);
+    if (todosLosEquipos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="11" class="loading">No hay equipos registrados</td></tr>';
+        actualizarPaginacion(0, 0, 0);
+        return;
+    }
+    
+    const inicio = (paginaActual - 1) * equiposPorPagina;
+    const fin = Math.min(inicio + equiposPorPagina, todosLosEquipos.length);
+    const equiposPagina = todosLosEquipos.slice(inicio, fin);
+    
+    tbody.innerHTML = '';
+    equiposPagina.forEach(equipo => {
+        const fila = crearFilaEquipo(equipo);
+        tbody.appendChild(fila);
+    });
+    
+    actualizarPaginacion(inicio + 1, fin, todosLosEquipos.length);
+    renderizarNumerosPagina(totalPaginas);
+}
+
+function actualizarPaginacion(inicio, fin, total) {
+    const info = document.getElementById('paginationInfo');
+    if (info) info.textContent = total === 0 ? 'Mostrando 0-0 de 0 equipos' : `Mostrando ${inicio}-${fin} de ${total} equipos`;
+    const prev = document.getElementById('prevPage');
+    const next = document.getElementById('nextPage');
+    if (prev) prev.disabled = paginaActual === 1;
+    if (next) next.disabled = paginaActual === Math.ceil(todosLosEquipos.length / equiposPorPagina);
+}
+
+function renderizarNumerosPagina(totalPaginas) {
+    const container = document.getElementById('paginationNumbers');
+    if (!container) return;
+    container.innerHTML = '';
+    for (let i = 1; i <= totalPaginas; i++) {
+        const btn = document.createElement('button');
+        btn.className = `pagination-number ${i === paginaActual ? 'active' : ''}`;
+        btn.textContent = i;
+        btn.onclick = () => { paginaActual = i; renderizarPagina(); };
+        container.appendChild(btn);
+    }
+}
+
+function crearFilaEquipo(equipo) {
+    const tr = document.createElement('tr');
+    const diasGarantia = calcularDiasRestantes(equipo.garantia_fin);
+    const estadoGarantia = getEstadoGarantia(diasGarantia);
+    const diasManto = calcularDiasRestantes(equipo.mtto_inicio);
+    let claseManto = '', tooltipManto = '';
+    
+    if (diasManto < 0) { claseManto = 'urgente'; tooltipManto = '⚠️ Mtto. vencido'; }
+    else if (diasManto <= 7) { claseManto = 'proximo'; tooltipManto = `🔔 Vence en ${diasManto} días`; }
+    else if (diasManto === 999) tooltipManto = '📅 No programado';
+    else tooltipManto = `📅 Próximo: ${diasManto} días`;
+    
+    let origen = '-';
+    if (equipo.importado) origen = '🌍 Importado';
+    if (equipo.nacionalizado) origen = '🇨🇴 Nacional';
+    
+    const mtosTexto = `${equipo.mtos_realizados || 0}/${equipo.mtos_pendientes || 0}`;
+    const observaciones = equipo.observaciones?.length > 30 ? equipo.observaciones.substring(0, 30) + '...' : (equipo.observaciones || '-');
+    
+    tr.innerHTML = `
+        <td>${equipo.id || ''}</td>
+        <td><strong>${equipo.equipo || ''}</strong></td>
+        <td>${equipo.cliente || ''}</td>
+        <td>${equipo.ubicacion || ''}</td>
+        <td>${origen}</td>
+        <td>${mtosTexto}</td>
+        <td>${equipo.garantia_fin ? new Date(equipo.garantia_fin).toLocaleDateString('es-ES') : ''}</td>
+        <td><span class="estado-garantia ${estadoGarantia.clase}">${estadoGarantia.texto}</span></td>
+        <td><span class="fecha-manto ${claseManto}" data-tooltip="${tooltipManto}">${equipo.mtto_inicio ? new Date(equipo.mtto_inicio).toLocaleDateString('es-ES') : '📅 No programado'}</span></td>
+        <td class="observaciones-cell" title="${equipo.observaciones || ''}">${observaciones}</td>
+        <td class="acciones-cell">
+            <button class="btn-accion editar" onclick="editarEquipo(${equipo.id})">✏️ Editar</button>
+            <button class="btn-accion eliminar" onclick="eliminarEquipo(${equipo.id})">🗑️ Eliminar</button>
+            <button class="btn-accion ver" onclick="verDetalle(${equipo.id})">👁️ Ver</button>
+            <button class="btn-accion indicadores" onclick="verIndicadores(${equipo.id})" style="background: #8b5cf6; color: white;">📊 Indicadores</button>
+        </td>
+    `;
+    return tr;
+}
+
+async function editarEquipo(id) {
+    console.log("Editando equipo ID:", id);
+    try {
+        const response = await fetch(`${API_URL}/equipos/${id}`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const equipo = await response.json();
+        
+        document.getElementById('equipo').value = equipo.equipo || '';
+        document.getElementById('ubicacion').value = equipo.ubicacion || '';
+        document.getElementById('garantia_inicio').value = equipo.garantia_inicio || '';
+        document.getElementById('garantia_fin').value = equipo.garantia_fin || '';
+        document.getElementById('mtto_inicio').value = equipo.mtto_inicio || '';
+        document.getElementById('importado').checked = equipo.importado || false;
+        document.getElementById('nacionalizado').checked = equipo.nacionalizado || false;
+        document.getElementById('mtos_pendientes').value = equipo.mtos_pendientes || 0;
+        document.getElementById('mtos_realizados').value = equipo.mtos_realizados || 0;
+        document.getElementById('observaciones').value = equipo.observaciones || '';
+        
+        const selectCliente = document.getElementById('cliente_id_select');
+        if (selectCliente && equipo.cliente_id) selectCliente.value = equipo.cliente_id;
+        const inputCliente = document.getElementById('cliente_nombre_input');
+        if (inputCliente && equipo.cliente) inputCliente.value = equipo.cliente;
+        
+        equipoEnEdicion = id;
+        const btn = document.querySelector('.btn-guardar');
+        if (btn) btn.textContent = 'Actualizar Equipo';
+        document.querySelector('.form-container')?.scrollIntoView({ behavior: 'smooth' });
+    } catch (error) {
+        console.error(error);
+        alert('❌ Error al cargar equipo para editar');
+    }
+}
+
+async function eliminarEquipo(id) {
+    if (!confirm('¿Estás seguro de eliminar este equipo?')) return;
+    try {
+        const response = await fetch(`${API_URL}/equipos/${id}`, { method: 'DELETE' });
+        if (response.ok) {
+            alert('✅ Equipo eliminado');
+            await cargarEquipos();
+        } else alert('❌ Error al eliminar');
+    } catch (error) { alert('❌ Error de conexión'); console.error(error); }
+}
+
+async function verDetalle(id) {
+    const modal = document.getElementById('detalleModal');
+    const body = document.getElementById('detalleBody');
+    modal.classList.add('show');
+    body.innerHTML = '<div class="loading">Cargando detalles...</div>';
+    try {
+        const response = await fetch(`${API_URL}/equipos/${id}`);
+        const equipo = await response.json();
+        const diasGarantia = calcularDiasRestantes(equipo.garantia_fin);
+        const estadoGarantia = getEstadoGarantia(diasGarantia);
+        let origen = 'No especificado';
+        if (equipo.importado) origen = '🌍 Importado';
+        if (equipo.nacionalizado) origen = '🇨🇴 Nacionalizado';
+        body.innerHTML = `<div class="detalle-card"><div class="detalle-grid"><div class="detalle-item"><div class="detalle-label">ID</div><div class="detalle-valor"><strong>#${equipo.id}</strong></div></div><div class="detalle-item"><div class="detalle-label">Estado Garantía</div><div class="detalle-valor"><span class="estado-badge ${estadoGarantia.clase}">${estadoGarantia.texto}</span></div></div><div class="detalle-item"><div class="detalle-label">Equipo</div><div class="detalle-valor"><strong>${equipo.equipo || 'No especificado'}</strong></div></div><div class="detalle-item"><div class="detalle-label">Cliente</div><div class="detalle-valor">${equipo.cliente || 'No especificado'}</div></div><div class="detalle-item"><div class="detalle-label">Ubicación</div><div class="detalle-valor">${equipo.ubicacion || 'No especificado'}</div></div><div class="detalle-item"><div class="detalle-label">Origen</div><div class="detalle-valor">${origen}</div></div><div class="detalle-item"><div class="detalle-label">Mantenimientos</div><div class="detalle-valor">${equipo.mtos_realizados || 0} de ${equipo.mtos_pendientes || 0} realizados</div></div><div class="detalle-item"><div class="detalle-label">Garantía Inicio</div><div class="detalle-valor">${equipo.garantia_inicio || 'No especificado'}</div></div><div class="detalle-item"><div class="detalle-label">Garantía Fin</div><div class="detalle-valor">${equipo.garantia_fin || 'No especificado'}</div></div><div class="detalle-item full-width"><div class="detalle-label">Observaciones</div><div class="detalle-valor">${equipo.observaciones || 'Sin observaciones'}</div></div></div></div>`;
+    } catch (error) { body.innerHTML = '<div class="loading">Error al cargar detalles</div>'; }
+}
+
+function cerrarModal() { document.getElementById('detalleModal')?.classList.remove('show'); }
+
+function calcularDiasRestantes(fechaStr) {
+    if (!fechaStr) return 999;
+    const hoy = new Date(), fecha = new Date(fechaStr);
+    return Math.ceil((fecha - hoy) / (1000 * 60 * 60 * 24));
+}
+
+function getEstadoGarantia(dias) {
+    if (dias < 0) return { clase: 'vencido', texto: 'Vencido' };
+    if (dias <= 30) return { clase: 'proximo', texto: 'Por vencer' };
+    return { clase: 'vigente', texto: 'Vigente' };
+}
+
+function cerrarSesion() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('usuario');
+    window.location.href = 'login.html';
+}
+
+async function verIndicadores(equipoId) {
+    let modal = document.getElementById('indicadoresModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'indicadoresModal';
+        modal.className = 'modal';
+        modal.innerHTML = `<div class="modal-content" style="max-width: 900px;"><div class="modal-header"><h2>📊 Indicadores de Mantenimiento</h2><span class="close-modal" onclick="cerrarModalIndicadores()">&times;</span></div><div class="modal-body" id="indicadoresBody"><div class="loading">Cargando...</div></div></div>`;
+        document.body.appendChild(modal);
+    }
+    modal.style.display = 'block';
+    const body = document.getElementById('indicadoresBody');
+    try {
+        const [resumen, intervenciones] = await Promise.all([
+            fetch(`${API_URL}/indicadores/resumen/${equipoId}`).then(r => r.json()),
+            fetch(`${API_URL}/intervenciones/equipo/${equipoId}`).then(r => r.json())
+        ]);
+        body.innerHTML = `<div class="indicadores-dashboard"><div class="kpi-grid"><div class="kpi-card" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8)"><div class="kpi-title">MTBF</div><div class="kpi-value">${resumen.mtbf} hrs</div><div class="kpi-sub">Tiempo medio entre fallos</div></div><div class="kpi-card" style="background:linear-gradient(135deg,#f59e0b,#d97706)"><div class="kpi-title">MTTR</div><div class="kpi-value">${resumen.mttr} hrs</div><div class="kpi-sub">Tiempo medio reparación</div></div><div class="kpi-card" style="background:linear-gradient(135deg,#10b981,#059669)"><div class="kpi-title">Disponibilidad</div><div class="kpi-value">${resumen.disponibilidad}%</div><div class="kpi-sub">Tiempo operativo</div></div><div class="kpi-card" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed)"><div class="kpi-title">ROI Mantenimiento</div><div class="kpi-value ${resumen.roi >= 0 ? 'positive' : 'negative'}">${resumen.roi}%</div><div class="kpi-sub">Retorno inversión</div></div></div><div style="margin-top:20px;background:white;padding:15px;border-radius:12px"><h3>📈 Resumen</h3><table style="width:100%"><tr><td><strong>Beneficios:</strong></td><td>$${resumen.beneficios.toLocaleString()}</td></tr><tr><td><strong>Inversión:</strong></td><td>$${resumen.inversion.toLocaleString()}</td></tr><tr><td><strong>Intervenciones:</strong></td><td>${resumen.total_intervenciones}</td></tr><tr><td><strong>Horas parada:</strong></td><td>${resumen.total_horas_parada} hrs</td></tr></table></div><div style="margin-top:20px"><h3>🔧 Últimas intervenciones</h3><table class="table" style="width:100%"><thead><tr><th>Fecha</th><th>Tipo</th><th>Horas</th><th>Costo</th><th>Técnico</th></tr></thead><tbody>${intervenciones.slice(0,10).map(i => `<tr><td>${i.fecha}</td><td>${i.tipo_intervencion}</td><td>${i.horas_parada} hrs</td><td>$${(i.costo_total || 0).toLocaleString()}</td><td>${i.tecnico || '-'}</td></tr>`).join('')}</tbody></table></div>`;
+    } catch (error) { body.innerHTML = '<div class="loading">Error al cargar indicadores</div>'; }
+}
+
+function cerrarModalIndicadores() { document.getElementById('indicadoresModal').style.display = 'none'; }
+
+let equipoActualId = null;
+
+function mostrarTab(tab) { if (tab === 'info') verDetalle(equipoActualId); else cargarHistorialReportes(equipoActualId); }
+
+async function cargarHistorialReportes(equipoId) {
+    const body = document.getElementById('detalleBody');
+    body.innerHTML = '<div class="loading">Cargando historial...</div>';
+    try {
+        const response = await fetch(`${API_URL}/intervenciones/equipo/${equipoId}`);
+        const intervenciones = await response.json();
+        if (!intervenciones.length) { body.innerHTML = `<div style="padding:20px;text-align:center"><p>📭 No hay reportes</p><button class="btn-guardar" onclick="window.location.href='reportes.html'">+ Generar Reporte</button></div>`; return; }
+        body.innerHTML = `<div style="padding:15px"><div style="display:flex;justify-content:space-between;margin-bottom:20px"><h3>📋 Reportes del Equipo</h3><button class="btn-guardar" onclick="window.location.href='reportes.html'" style="padding:6px 12px">+ Nuevo Reporte</button></div><table style="width:100%"><thead><tr><th>Fecha</th><th>Tipo</th><th>Horas</th><th>Costo</th><th>Técnico</th><th>Acciones</th></tr></thead><tbody>${intervenciones.map(i => `<tr><td>${i.fecha}</td><td>${i.tipo_intervencion}</td><td>${i.horas_parada} hrs</td><td>$${(i.costo_total || 0).toLocaleString()}</td><td>${i.tecnico || '-'}</td><td><button class="btn-accion ver" onclick="verReporte(${i.id})">👁️</button><button class="btn-accion editar" onclick="editarReporte(${i.id})">✏️</button><button class="btn-accion eliminar" onclick="eliminarReporte(${i.id})">🗑️</button></td></tr>`).join('')}</tbody></table></div>`;
+    } catch (error) { body.innerHTML = '<div class="loading">Error al cargar historial</div>'; }
+}
+
+function cargarDetalleEquipo(id) { verDetalle(id); }
+
+async function verReporte(id) {
+    try { const r = await fetch(`${API_URL}/intervenciones/${id}`).then(r => r.json()); alert(`Reporte del ${r.fecha}\nTipo: ${r.tipo_intervencion}\nHoras: ${r.horas_parada}\nCosto: $${(r.costo_total || 0).toLocaleString()}\nTécnico: ${r.tecnico}`); }
+    catch (error) { alert('Error al cargar reporte'); }
+}
+
+function editarReporte(id) { window.location.href = `reportes.html?edit=${id}`; }
+
+async function eliminarReporte(id) {
+    if (!confirm('¿Eliminar reporte?')) return;
+    try { await fetch(`${API_URL}/intervenciones/${id}`, { method: 'DELETE' }); alert('✅ Reporte eliminado'); cargarHistorialReportes(equipoActualId); }
+    catch (error) { alert('Error de conexión'); }
+}
+
+async function cargarClientesEnSelector() {
+    try {
+        const response = await fetch(`${API_URL}/clientes`);
+        const clientes = await response.json();
+        const select = document.getElementById('cliente_id_select');
+        if (select) {
+            select.innerHTML = '<option value="">Seleccione un cliente...</option>';
+            clientes.forEach(cliente => select.innerHTML += `<option value="${cliente.id}">${cliente.nombre}</option>`);
+        }
+    } catch (error) { console.error(error); }
+}
