@@ -250,13 +250,18 @@
     </style>
 </head>
 <body>
+    <div class="logo-header">
+    <img src="/assets/logo.png" alt="Logo" class="logo-header-img">
+</div>
 <script>
     const token = localStorage.getItem('token');
     if (!token) {
         window.location.href = 'login.html';
     }
+</script>
 
 <script src="validar_permisos.js"></script>
+
 <script>
     const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
     const tienePermiso = usuario.permisos?.reportes || usuario.username === 'admin';

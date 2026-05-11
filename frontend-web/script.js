@@ -7,6 +7,7 @@ const equiposPorPagina = 5;
 
 document.addEventListener('DOMContentLoaded', () => {
     cargarEquipos();
+    cargarClientesEnSelector();  // ← NUEVO: cargar clientes en el selector
     
     document.querySelector('.close-modal').addEventListener('click', cerrarModal);
     window.addEventListener('click', (e) => {
@@ -17,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('prevPage').addEventListener('click', () => {
         if (paginaActual > 1) {
             paginaActual--;
-            renderizarPagina();
+            renderizarPagina(); 
         }
     });
     
@@ -49,13 +50,18 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 let equipoEnEdicion = null;
-
 document.getElementById('equipoForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
+    const selectCliente = document.getElementById('cliente_id');
+    const inputCliente = document.getElementById('cliente_nuevo');
+    const clienteId = selectCliente && selectCliente.value ? parseInt(selectCliente.value) : null;
+    const clienteNombre = inputCliente ? inputCliente.value.trim() : '';
+    
     const equipo = {
         equipo: document.getElementById('equipo').value,
-        cliente: document.getElementById('cliente').value,
+        cliente: clienteNombre || (clienteId ? '' : ''),
+        cliente_id: clienteId,
         ubicacion: document.getElementById('ubicacion').value,
         garantia_inicio: document.getElementById('garantia_inicio').value,
         garantia_fin: document.getElementById('garantia_fin').value,
@@ -67,7 +73,6 @@ document.getElementById('equipoForm').addEventListener('submit', async (e) => {
         mtos_realizados: parseInt(document.getElementById('mtos_realizados').value) || 0,
         observaciones: document.getElementById('observaciones').value || ''
     };
-
     try {
         let response;
         if (equipoEnEdicion) {
@@ -107,14 +112,13 @@ async function cargarEquipos() {
         const response = await fetch(`${API_URL}/equipos`);
         const data = await response.json();
         
-        // Verificar si la respuesta es un array o tiene error
         if (Array.isArray(data)) {
             todosLosEquipos = data;
         } else if (data.error) {
             console.error('Error del servidor:', data.error);
             todosLosEquipos = [];
             document.getElementById('cronogramaBody').innerHTML = 
-                '<tr><td colspan="11" class="loading">❌ Error del servidor: ' + data.error + '</td></tr>';
+                '<tr><td colspan="11" class="loading">❌ Error del servidor: ' + data.error + '</td><\/tr>';
             return;
         } else {
             todosLosEquipos = [];
@@ -139,7 +143,7 @@ async function cargarEquipos() {
     } catch (error) {
         console.error('Error al cargar equipos:', error);
         document.getElementById('cronogramaBody').innerHTML = 
-            '<tr><td colspan="11" class="loading">❌ Error al cargar equipos</td></tr>';
+            '<tr><td colspan="11" class="loading">❌ Error al cargar equipos</td><\/tr>';
     }
 }
 
@@ -148,7 +152,7 @@ function renderizarPagina() {
     const totalPaginas = Math.ceil(todosLosEquipos.length / equiposPorPagina);
     
     if (todosLosEquipos.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="11" class="loading">No hay equipos registrados</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="11" class="loading">No hay equipos registrados</td><\/tr>';
         actualizarPaginacion(0, 0, 0);
         return;
     }
@@ -213,12 +217,10 @@ function crearFilaEquipo(equipo) {
         tooltipManto = `📅 Próximo: ${diasManto} días`;
     }
     
-    // Determinar origen
     let origen = '-';
     if (equipo.importado) origen = '🌍 Importado';
     if (equipo.nacionalizado) origen = '🇨🇴 Nacional';
     
-    // Texto de mantenimientos
     const mtosTexto = `${equipo.mtos_realizados || 0}/${equipo.mtos_pendientes || 0}`;
     
     const observaciones = equipo.observaciones ? 
@@ -329,7 +331,6 @@ async function verDetalle(id) {
             textoManto = `📅 Próximo: ${diasManto} días`;
         }
         
-        // Determinar origen
         let origen = 'No especificado';
         if (equipo.importado) origen = '🌍 Importado';
         if (equipo.nacionalizado) origen = '🇨🇴 Nacionalizado';
@@ -412,9 +413,26 @@ function getEstadoGarantia(dias) {
     if (dias <= 30) return { clase: 'proximo', texto: 'Por vencer' };
     return { clase: 'vigente', texto: 'Vigente' };
 }
-// Función para cerrar sesión
+
 function cerrarSesion() {
     localStorage.removeItem('token');
     localStorage.removeItem('usuario');
     window.location.href = 'login.html';
-}function cerrarSesion() { localStorage.removeItem("token"); localStorage.removeItem("usuario"); window.location.href = "login.html"; }
+}
+
+// ===== NUEVA FUNCIÓN AGREGADA =====
+async function cargarClientesEnSelector() {
+    try {
+        const response = await fetch(`${API_URL}/clientes`);
+        const clientes = await response.json();
+        const select = document.getElementById('cliente_id');
+        if (select) {
+            select.innerHTML = '<option value="">Seleccione un cliente...</option>';
+            clientes.forEach(cliente => {
+                select.innerHTML += `<option value="${cliente.id}">${cliente.nombre}</option>`;
+            });
+        }
+    } catch (error) {
+        console.error('Error cargando clientes:', error);
+    }
+}
