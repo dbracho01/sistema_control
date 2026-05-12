@@ -221,8 +221,15 @@ async function eliminarCliente(id) {
         }
     }
 }
-
-// Función verCliente (agregada)
 function verCliente(id) {
-    window.open(`${API_URL}/ver-cliente/${id}`, '_blank');
+    console.log("Ver cliente ID:", id);
+    fetch(`${API_URL}/clientes/${id}`)
+        .then(response => response.json())
+        .then(cliente => {
+            alert(`📋 CLIENTE\nID: ${cliente.id}\nNombre: ${cliente.nombre}\nEmail: ${cliente.email || 'N/A'}\nTeléfono: ${cliente.telefono || 'N/A'}\nDirección: ${cliente.direccion || 'N/A'}`);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al cargar el cliente');
+        });
 }

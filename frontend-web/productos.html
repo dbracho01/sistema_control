@@ -1085,11 +1085,16 @@
                     console.error('Error:', error);
                 }
             }
-
-                    function verProducto(id) {
-            window.open(`${API_URL}/ver-producto/${id}`, '_blank');
+        
         }
-        }
+        function verProducto(id) {
+    fetch(`${API_URL}/productos/${id}`)
+        .then(response => response.json())
+        .then(producto => {
+            alert(`📦 PRODUCTO\nID: ${producto.id}\nNombre: ${producto.nombre_producto}\nReferencia: ${producto.referencia || 'N/A'}\nStock: ${producto.cantidad_stock || 0}`);
+        })
+        .catch(error => alert('Error al cargar el producto'));
+       }
     </script>
     <script>
     function cerrarSesion() {

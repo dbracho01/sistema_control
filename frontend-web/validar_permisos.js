@@ -104,5 +104,6 @@ function initPage(moduloRequerido) {
     }
     
     return true;
+    }
 
 EOF
