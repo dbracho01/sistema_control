@@ -1399,4 +1399,123 @@ async def ver_reporte(reporte_id: int, db: Session = Depends(get_db)):
     from fastapi.responses import HTMLResponse
     template = Template(html_template)
     return HTMLResponse(content=template.render(reporte=reporte, equipo=equipo))
+# ============================================
+# ENDPOINTS PARA MÉTRICAS Y KPIs
+# ============================================
 
+from models.indicadores import Intervencion
+from models.cronograma import Cronograma
+from datetime import datetime, timedelta
+
+@app.get("/metricas/resumen")
+async def get_metricas_resumen(db: Session = Depends(get_db)):
+    """Métricas generales de todos los equipos"""
+    equipos = db.query(Cronograma).all()
+    intervenciones = db.query(Intervencion).all()
+    
+    total_equipos = len(equipos)
+    total_intervenciones = len(intervenciones)
+    total_horas_parada = sum(i.horas_parada for i in intervenciones if i.horas_parada)
+    total_costo_mantenimiento = sum(i.costo_total for i in intervenciones if i.costo_total)
+    total_ingresos = sum(i.ingreso_generado for i in intervenciones if i.ingreso_generado)
+    total_ahorros = sum(i.ahorro_fallos for i in intervenciones if i.ahorro_fallos)
+    
+    return {
+        "total_equipos": total_equipos,
+        "total_intervenciones": total_intervenciones,
+        "total_horas_parada": total_horas_parada,
+        "total_costo_mantenimiento": total_costo_mantenimiento,
+        "total_ingresos": total_ingresos,
+        "total_ahorros": total_ahorros
+    }
+
+@app.get("/metricas/equipo/{equipo_id}")
+async def get_metricas_equipo(equipo_id: int, db: Session = Depends(get_db)):
+    """Métricas específicas por equipo"""
+    from models.indicadores import Intervencion
+    from models.cronograma import Cronograma
+    
+    equipo = db.query(Cronograma).filter(Cronograma.id == equipo_id).first()
+    if not equipo:
+        return {"error": "Equipo no encontrado"}
+    
+    intervenciones = db.query(Intervencion).filter(Intervencion.equipo_id == equipo_id).all()
+    
+    if len(intervenciones) == 0:
+        return {
+            "equipo": equipo.equipo,
+            "cliente": equipo.cliente,
+            "error": "Sin datos suficientes"
+        }
+    
+    # Calcular métricas
+    fallos = [i for i in intervenciones if i.tipo_intervencion == "Correctivo"]
+    total_fallos = len(fallos)
+    
+    # Tiempo total de operación (días desde primer registro hasta hoy)
+    fechas = [i.fecha for i in intervenciones if i.fecha]
+    if fechas:
+        fecha_inicio = min(fechas)
+        dias_operacion = (datetime.now().date() - fecha_inicio).days
+    else:
+        dias_operacion = 30
+    
+    horas_operacion = dias_operacion * 8  # Asumiendo 8 horas/día
+    
+    # MTBF = Horas operación / Número de fallos
+    MTBF = horas_operacion / total_fallos if total_fallos > 0 else 0
+    
+    # MTTF = MTBF
+    MTTF = MTBF
+    
+    # MDT = Horas totales de parada / Número de fallos
+    horas_parada = sum(i.horas_parada for i in fallos if i.horas_parada)
+    MDT = horas_parada / total_fallos if total_fallos > 0 else 0
+    
+    # MUT = MTBF - MDT
+    MUT = MTBF - MDT if MTBF > MDT else 0
+    
+    # Tasa de fallo λ = 1 / MTBF
+    lamda = 1 / MTBF if MTBF > 0 else 0
+    
+    # MTTR = MDT
+    MTTR = MDT
+    
+    # ROI de Mantenimiento
+    costo_mantenimiento = sum(i.costo_total for i in intervenciones if i.costo_total)
+    ingresos_generados = sum(i.ingreso_generado for i in intervenciones if i.ingreso_generado)
+    ahorros_fallos = sum(i.ahorro_fallos for i in intervenciones if i.ahorro_fallos)
+    
+    beneficio = ingresos_generados + ahorros_fallos - costo_mantenimiento
+    roi = ((beneficio - costo_mantenimiento) / costo_mantenimiento * 100) if costo_mantenimiento > 0 else 0
+    
+    return {
+        "equipo": equipo.equipo,
+        "cliente": equipo.cliente,
+        "periodo_dias": dias_operacion,
+        "MTTF": round(MTTF, 2),
+        "MDT": round(MDT, 2),
+        "MUT": round(MUT, 2),
+        "MTBF": round(MTBF, 2),
+        "tasa_fallo_lamda": round(lamda, 6),
+        "MTTR": round(MTTR, 2),
+        "roi_mantenimiento": round(roi, 2),
+        "total_fallos": total_fallos,
+        "total_intervenciones": len(intervenciones),
+        "costo_total_mantenimiento": costo_mantenimiento,
+        "ingresos_generados": ingresos_generados,
+        "ahorros_fallos": ahorros_fallos
+    }
+
+@app.get("/metricas/equipos/todos")
+async def get_metricas_todos_equipos(db: Session = Depends(get_db)):
+    """Métricas para todos los equipos"""
+    equipos = db.query(Cronograma).all()
+    resultados = []
+    
+    for equipo in equipos:
+        res = await get_metricas_equipo(equipo.id, db)
+        if "error" not in res:
+            resultados.append(res)
+    
+    return resultados

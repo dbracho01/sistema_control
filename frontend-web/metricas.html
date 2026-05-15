@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Métricas y KPIs</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .metrics-container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+        
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .kpi-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            padding: 20px;
+            color: white;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .kpi-card h3 {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+        
+        .kpi-value {
+            font-size: 32px;
+            font-weight: bold;
+        }
+        
+        .kpi-unit {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        .filtros {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .tabla-metricas {
+            overflow-x: auto;
+        }
+        
+        .btn-exportar {
+            background: #10b981;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        
+        .roi-positivo {
+            color: #10b981;
+            font-weight: bold;
+        }
+        
+        .roi-negativo {
+            color: #ef4444;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="logo-header">
+        <img src="/assets/logo.png" alt="Logo" class="logo-header-img">
+    </div>
+
+    <div class="app-container">
+        <div class="main-content">
+            <div class="tabs">
+                <button class="tab" onclick="window.location.href='index.html'">📋 Cronograma</button>
+                <button class="tab" onclick="window.location.href='reportes.html'">📊 Reportes</button>
+                <button class="tab" onclick="window.location.href='cotizaciones.html'">💰 Cotizaciones</button>
+                <button class="tab" onclick="window.location.href='clientes.html'">👥 Clientes</button>
+                <button class="tab" onclick="window.location.href='productos.html'">📦 Productos</button>
+                <button class="tab" onclick="window.location.href='propuestas.html'">📄 Propuestas</button>
+                <button class="tab active" onclick="window.location.href='metricas.html'">📈 Métricas</button>
+                <button class="tab" onclick="window.location.href='admin_usuarios.html'" style="background: #8b5cf6; color: white;">👑 Admin</button>
+                <button class="tab" onclick="cerrarSesion()" style="background: #ef4444; color: white; margin-left: auto;">🔒 Cerrar Sesión</button>
+            </div>
+
+            <div class="metrics-container">
+                <h2>📈 Dashboard de Métricas y KPIs</h2>
+                
+                <div class="filtros">
+                    <h3>Filtros</h3>
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                        <select id="clienteFiltro" style="padding: 10px; border-radius: 8px; min-width: 200px;">
+                            <option value="">Todos los clientes</option>
+                        </select>
+                        <select id="equipoFiltro" style="padding: 10px; border-radius: 8px; min-width: 200px;">
+                            <option value="">Todos los equipos</option>
+                        </select>
+                        <button onclick="aplicarFiltros()" class="btn-guardar">🔍 Aplicar Filtros</button>
+                        <button onclick="exportarPDF()" class="btn-exportar">📄 Exportar PDF</button>
+                        <button onclick="exportarExcel()" class="btn-exportar">📊 Exportar Excel</button>
+                    </div>
+                </div>
+
+                <div class="kpi-grid" id="kpiGrid">
+                    <div class="kpi-card" style="background: linear-gradient(135deg, #3b82f6, #1e40af);">
+                        <h3>MTBF (Tiempo medio entre fallos)</h3>
+                        <div class="kpi-value" id="mtbfValue">0</div>
+                        <div class="kpi-unit">horas</div>
+                    </div>
+                    <div class="kpi-card" style="background: linear-gradient(135deg, #10b981, #047857);">
+                        <h3>MTTR (Tiempo medio reparación)</h3>
+                        <div class="kpi-value" id="mttrValue">0</div>
+                        <div class="kpi-unit">horas</div>
+                    </div>
+                    <div class="kpi-card" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                        <h3>Disponibilidad (MUT/MTBF)</h3>
+                        <div class="kpi-value" id="disponibilidadValue">0</div>
+                        <div class="kpi-unit">%</div>
+                    </div>
+                    <div class="kpi-card" style="background: linear-gradient(135deg, #ef4444, #b91c1c);">
+                        <h3>Tasa de fallo (λ)</h3>
+                        <div class="kpi-value" id="tasaFalloValue">0</div>
+                        <div class="kpi-unit">fallos/hora</div>
+                    </div>
+                    <div class="kpi-card" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9);">
+                        <h3>ROI Mantenimiento</h3>
+                        <div class="kpi-value" id="roiValue">0</div>
+                        <div class="kpi-unit">%</div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="metricasChart" width="400" height="200"></canvas>
+                </div>
+
+                <div class="chart-container">
+                    <h3>Top 5 Equipos con Mejor ROI</h3>
+                    <div id="topEquipos"></div>
+                </div>
+
+                <div class="table-container">
+                    <h3>Métricas por Equipo</h3>
+                    <table id="metricasTable">
+                        <thead>
+                            <tr>
+                                <th>Equipo</th>
+                                <th>Cliente</th>
+                                <th>MTBF (hrs)</th>
+                                <th>MTTR (hrs)</th>
+                                <th>Disponibilidad</th>
+                                <th>ROI</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="metricasBody">
+                            <tr><td colspan="7" class="loading">Cargando métricas...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="metricas.js"></script>
+    <script>
+        function cerrarSesion() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('usuario');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>
