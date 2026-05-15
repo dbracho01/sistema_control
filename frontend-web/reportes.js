@@ -169,3 +169,205 @@ const datos = {
         alert('❌ Error de conexión con el servidor');
     }
 });
+// Cargar equipos en el selector
+async function cargarEquiposEnSelector() {
+    try {
+        const response = await fetch(`${API_URL}/equipos`);
+        const equipos = await response.json();
+        const select = document.getElementById('equipo_select');
+        
+        if (select) {
+            select.innerHTML = '<option value="">Seleccione un equipo...</option>';
+            equipos.forEach(equipo => {
+                select.innerHTML += `<option value="${equipo.id}">${equipo.equipo} - ${equipo.cliente}</option>`;
+            });
+            console.log(`✅ ${equipos.length} equipos cargados en el selector`);
+        }
+    } catch (error) {
+        console.error('Error cargando equipos:', error);
+    }
+}
+
+// Llamar la función cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', () => {
+    cargarEquiposEnSelector();
+});
+
+// Función para guardar reporte
+async function guardarYListarReporte(event) {
+    event.preventDefault();
+    
+    // Obtener equipo seleccionado
+    const equipoSelect = document.getElementById('equipo_select');
+    const equipoId = equipoSelect ? equipoSelect.value : null;
+    
+    if (!equipoId) {
+        alert('❌ Seleccione un equipo');
+        return;
+    }
+    
+    // Determinar tipo de intervención
+    let tipoIntervencion = "Preventivo";
+    if (document.getElementById('servicio_correctivo')?.checked) tipoIntervencion = "Correctivo";
+    else if (document.getElementById('servicio_instalacion')?.checked) tipoIntervencion = "Instalación";
+    else if (document.getElementById('servicio_asesoria')?.checked) tipoIntervencion = "Asesoría";
+    else if (document.getElementById('servicio_consulta')?.checked) tipoIntervencion = "Consulta";
+    
+    // Obtener materiales
+    const materiales = [];
+    document.querySelectorAll('.material-row').forEach(row => {
+        const descripcion = row.querySelector('input[name="material_desc[]"]')?.value;
+        if (descripcion) {
+            materiales.push({
+                descripcion: descripcion,
+                cantidad: row.querySelector('input[name="material_cant[]"]')?.value,
+                referencia: row.querySelector('input[name="material_ref[]"]')?.value
+            });
+        }
+    });
+    
+    const datos = {
+        equipo_id: parseInt(equipoId),
+        fecha: document.getElementById('fecha').value,
+        hora_inicio: document.getElementById('hora').value || "00:00",
+        hora_fin: document.getElementById('hora').value || "00:00",
+        tipo_intervencion: tipoIntervencion,
+        descripcion: document.getElementById('descripcion_problema')?.value || document.getElementById('comentarios')?.value || "",
+        tecnico: document.getElementById('tecnico').value,
+        costo_mano_obra: parseFloat(document.getElementById('costo_mano_obra')?.value) || 0,
+        costo_repuestos: 0,
+        ingreso_generado: parseFloat(document.getElementById('ingreso_generado')?.value) || 0,
+        ahorro_fallos: parseFloat(document.getElementById('ahorro_fallos')?.value) || 0,
+        materiales: materiales
+    };
+    
+    try {
+        const response = await fetch(`${API_URL}/intervenciones`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(datos)
+        });
+        
+        if (response.ok) {
+            alert('✅ Reporte guardado exitosamente');
+            
+            // Incrementar número de reporte
+            let numActual = parseInt(document.getElementById('reporteNumero').textContent.split('-')[1]);
+            numActual++;
+            document.getElementById('reporteNumero').textContent = `ST-${numActual}`;
+            localStorage.setItem('reporteContador', numActual);
+            
+            // Limpiar formulario
+            document.getElementById('tecnico').value = '';
+            document.getElementById('descripcion_problema').value = '';
+            document.getElementById('comentarios').value = '';
+            document.getElementById('equipo_select').value = '';
+            
+            // Recargar lista de reportes
+            if (typeof cargarListaReportes === 'function') {
+                await cargarListaReportes();
+            }
+        } else {
+            const error = await response.json();
+            alert('❌ Error al guardar: ' + JSON.stringify(error));
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('❌ Error de conexión');
+    }
+}
+
+// Conectar el botón guardar
+document.addEventListener('DOMContentLoaded', () => {
+    const btnGuardar = document.getElementById('btnGuardarReporte');
+    if (btnGuardar) {
+        btnGuardar.addEventListener('click', guardarYListarReporte);
+        console.log('✅ Botón guardar conectado');
+    } else {
+        console.log('❌ Botón guardar no encontrado');
+    }
+});
+// Cargar lista de reportes guardados
+async function cargarListaReportes() {
+    const container = document.getElementById('listaReportes');
+    if (!container) return;
+    
+    container.innerHTML = '<div class="loading">Cargando reportes...</div>';
+    
+    try {
+        const response = await fetch(`${API_URL}/intervenciones`);
+        const reportes = await response.json();
+        
+        if (reportes.length === 0) {
+            container.innerHTML = '<div class="loading">📭 No hay reportes guardados</div>';
+            return;
+        }
+        
+        let html = `
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: #f1f5f9;">
+                        <th style="padding: 10px;">Consecutivo</th>
+                        <th style="padding: 10px;">Fecha</th>
+                        <th style="padding: 10px;">Cliente</th>
+                        <th style="padding: 10px;">Equipo</th>
+                        <th style="padding: 10px;">Tipo</th>
+                        <th style="padding: 10px;">Técnico</th>
+                        <th style="padding: 10px;">Horas</th>
+                        <th style="padding: 10px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        
+        reportes.forEach(r => {
+            html += `
+                <tr style="border-bottom: 1px solid #ddd;">
+                    <td style="padding: 8px;"><strong>ST-${r.id.toString().padStart(4, '0')}</strong></td>
+                    <td style="padding: 8px;">${r.fecha}</td>
+                    <td style="padding: 8px;">${r.cliente_nombre || 'N/A'}</td>
+                    <td style="padding: 8px;">${r.equipo_nombre || 'Equipo #' + r.equipo_id}</td>
+                    <td style="padding: 8px;">${r.tipo_intervencion}</td>
+                    <td style="padding: 8px;">${r.tecnico || '-'}</td>
+                    <td style="padding: 8px;">${r.horas_parada} hrs</td>
+                    <td style="padding: 8px;">
+                        <button class="btn-accion ver" onclick="verReporte(${r.id})">👁️</button>
+                        <button class="btn-accion eliminar" onclick="eliminarReporte(${r.id})">🗑️</button>
+                    </td>
+                </tr>
+            `;
+        });
+        
+        html += `</tbody></table>`;
+        container.innerHTML = html;
+        
+    } catch (error) {
+        console.error('Error:', error);
+        container.innerHTML = '<div class="loading">Error al cargar reportes</div>';
+    }
+}
+
+// Función para ver reporte
+function verReporte(id) {
+    window.open(`http://127.0.0.1:8000/ver-reporte/${id}`, '_blank');
+}
+
+// Función para eliminar reporte
+async function eliminarReporte(id) {
+    if (!confirm('¿Eliminar este reporte?')) return;
+    try {
+        const response = await fetch(`${API_URL}/intervenciones/${id}`, { method: 'DELETE' });
+        if (response.ok) {
+            alert('✅ Reporte eliminado');
+            cargarListaReportes();
+        } else {
+            alert('❌ Error al eliminar');
+        }
+    } catch (error) {
+        alert('Error de conexión');
+    }
+}
+// Forzar carga de reportes después de 1 segundo
+setTimeout(() => {
+    cargarListaReportes();
+}, 1000);

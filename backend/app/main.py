@@ -1177,3 +1177,226 @@ def toggle_activo_usuario(usuario_id: int, db: Session = Depends(get_db)):
     usuario.activo = not usuario.activo
     db.commit()
     return {"mensaje": f"Usuario {'activado' if usuario.activo else 'desactivado'}", "activo": usuario.activo}
+
+# ============================================
+# MODELO Y ENDPOINTS PARA INTERVENCIONES (REPORTES)
+# ============================================
+
+class IntervencionCreate(BaseModel):
+    equipo_id: int
+    fecha: date
+    hora_inicio: str
+    hora_fin: str
+    tipo_intervencion: str
+    descripcion: Optional[str] = ""
+    tecnico: str
+    costo_mano_obra: float = 0
+    costo_repuestos: float = 0
+    ingreso_generado: float = 0
+    ahorro_fallos: float = 0
+    materiales: Optional[list] = []
+
+@app.post("/intervenciones")
+def crear_intervencion(intervencion: IntervencionCreate, db: Session = Depends(get_db)):
+    try:
+        from models.indicadores import Intervencion
+        from datetime import datetime
+        
+        horas_parada = 0
+        if intervencion.hora_inicio and intervencion.hora_fin:
+            try:
+                h1 = datetime.strptime(intervencion.hora_inicio, "%H:%M")
+                h2 = datetime.strptime(intervencion.hora_fin, "%H:%M")
+                horas_parada = (h2 - h1).seconds / 3600
+            except:
+                pass
+        
+        db_intervencion = Intervencion(
+            equipo_id=intervencion.equipo_id,
+            fecha=intervencion.fecha,
+            hora_inicio=intervencion.hora_inicio,
+            hora_fin=intervencion.hora_fin,
+            tipo_intervencion=intervencion.tipo_intervencion,
+            descripcion=intervencion.descripcion,
+            tecnico=intervencion.tecnico,
+            horas_parada=horas_parada,
+            costo_mano_obra=intervencion.costo_mano_obra,
+            costo_repuestos=intervencion.costo_repuestos,
+            costo_total=intervencion.costo_mano_obra + intervencion.costo_repuestos,
+            ingreso_generado=intervencion.ingreso_generado,
+            ahorro_fallos=intervencion.ahorro_fallos,
+            completado=0
+        )
+        db.add(db_intervencion)
+        db.commit()
+        db.refresh(db_intervencion)
+        return db_intervencion
+    except Exception as e:
+        print(f"Error en POST /intervenciones: {e}")
+        return {"error": str(e)}
+
+@app.get("/intervenciones")
+def obtener_intervenciones(db: Session = Depends(get_db)):
+    try:
+        from models.indicadores import Intervencion
+        from models.cronograma import Cronograma
+        
+        intervenciones = db.query(Intervencion).order_by(Intervencion.fecha.desc()).all()
+        resultados = []
+        
+        for i in intervenciones:
+            equipo = db.query(Cronograma).filter(Cronograma.id == i.equipo_id).first()
+            resultados.append({
+                "id": i.id,
+                "equipo_id": i.equipo_id,
+                "equipo_nombre": equipo.equipo if equipo else "N/A",
+                "cliente_nombre": equipo.cliente if equipo else "N/A",
+                "fecha": i.fecha,
+                "tipo_intervencion": i.tipo_intervencion,
+                "horas_parada": i.horas_parada,
+                "tecnico": i.tecnico,
+                "costo_total": i.costo_total,
+                "descripcion": i.descripcion
+            })
+        
+        return resultados
+    except Exception as e:
+        print(f"Error en GET /intervenciones: {e}")
+        return []
+
+@app.delete("/intervenciones/{intervencion_id}")
+def eliminar_intervencion(intervencion_id: int, db: Session = Depends(get_db)):
+    try:
+        from models.indicadores import Intervencion
+        from fastapi.responses import JSONResponse
+        
+        intervencion = db.query(Intervencion).filter(Intervencion.id == intervencion_id).first()
+        if not intervencion:
+            return JSONResponse(status_code=404, content={"error": "Intervención no encontrada"})
+        
+        db.delete(intervencion)
+        db.commit()
+        return {"mensaje": "Intervención eliminada correctamente"}
+    except Exception as e:
+        print(f"Error en DELETE /intervenciones/{intervencion_id}: {e}")
+        return {"error": str(e)}
+
+@app.get("/ver-reporte/{reporte_id}")
+async def ver_reporte(reporte_id: int, db: Session = Depends(get_db)):
+    from models.indicadores import Intervencion
+    from models.cronograma import Cronograma
+    
+    reporte = db.query(Intervencion).filter(Intervencion.id == reporte_id).first()
+    if not reporte:
+        return {"error": "Reporte no encontrado"}
+    
+    equipo = db.query(Cronograma).filter(Cronograma.id == reporte.equipo_id).first()
+    
+    html_template = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Reporte ST-{{ reporte.id }}</title>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 2cm; background: white; }
+            .header { display: flex; justify-content: space-between; border-bottom: 2px solid #2563eb; padding-bottom: 20px; margin-bottom: 30px; }
+            .logo { width: 140px; }
+            .numero { font-size: 24px; font-weight: bold; color: #ef4444; }
+            .cliente-info { background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+            table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+            th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+            th { background: #f1f5f9; }
+            .totales { text-align: right; margin-top: 20px; padding-top: 10px; border-top: 1px solid #ddd; }
+            .total-final { font-size: 18px; font-weight: bold; color: #2563eb; }
+            .btn-imprimir { background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 14px; margin-bottom: 20px; }
+            .btn-imprimir:hover { background: #1d4ed8; }
+            
+            /* FORZAR COLORES EN IMPRESIÓN */
+            @media print {
+                .btn-imprimir { display: none; }
+                * {
+                    -webkit-print-color-adjust: exact !important;
+                    print-color-adjust: exact !important;
+                    color-adjust: exact !important;
+                }
+                .header {
+                    border-bottom: 2px solid #2563eb !important;
+                }
+                .numero {
+                    color: #ef4444 !important;
+                }
+                .cliente-info {
+                    background: #f8fafc !important;
+                    -webkit-print-color-adjust: exact !important;
+                    print-color-adjust: exact !important;
+                }
+                th {
+                    background: #f1f5f9 !important;
+                    -webkit-print-color-adjust: exact !important;
+                    print-color-adjust: exact !important;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <button class="btn-imprimir" onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
+        
+        <div class="header">
+            <img src="/assets/logo.png" class="logo">
+            <div class="numero">REPORTE ST-{{ "%04d"|format(reporte.id) }}</div>
+        </div>
+        
+        <div class="cliente-info">
+            <h3>Información del Reporte</h3>
+            <p><strong>Fecha:</strong> {{ reporte.fecha }}</p>
+            <p><strong>Tipo de Intervención:</strong> {{ reporte.tipo_intervencion }}</p>
+            <p><strong>Técnico:</strong> {{ reporte.tecnico }}</p>
+            <p><strong>Horas de Parada:</strong> {{ reporte.horas_parada }} horas</p>
+        </div>
+        
+        <div class="cliente-info">
+            <h3>Cliente y Equipo</h3>
+            <p><strong>Cliente:</strong> {{ equipo.cliente if equipo else 'N/A' }}</p>
+            <p><strong>Equipo:</strong> {{ equipo.equipo if equipo else 'N/A' }}</p>
+            <p><strong>Ubicación:</strong> {{ equipo.ubicacion if equipo else 'N/A' }}</p>
+        </div>
+        
+        <h3>Descripción del Trabajo Realizado</h3>
+        <div class="cliente-info">
+            <p>{{ reporte.descripcion or 'Sin descripción' }}</p>
+        </div>
+        
+        <h3>Costos</h3>
+        <table>
+            <thead>
+                <tr><th>Concepto</th><th>Valor</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>Mano de Obra</td><td>${{ "%.2f"|format(reporte.costo_mano_obra) }}</td></tr>
+                <tr><td>Repuestos</td><td>${{ "%.2f"|format(reporte.costo_repuestos) }}</td></tr>
+                <tr><td><strong>TOTAL</strong></td><td><strong>${{ "%.2f"|format(reporte.costo_total) }}</strong></td></tr>
+            </tbody>
+        </table>
+        
+        {% if reporte.materiales %}
+        <h3>Materiales Utilizados</h3>
+        <table>
+            <thead>
+                <tr><th>Descripción</th><th>Cantidad</th><th>Referencia</th></tr>
+            </thead>
+            <tbody>
+                {% for m in reporte.materiales %}
+                <tr><td>{{ m.descripcion }}</td><td>{{ m.cantidad }}</td><td>{{ m.referencia }}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+    </body>
+    </html>
+    """
+    from jinja2 import Template
+    from fastapi.responses import HTMLResponse
+    template = Template(html_template)
+    return HTMLResponse(content=template.render(reporte=reporte, equipo=equipo))
+
