@@ -7,14 +7,13 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <script src="validar_permisos.js"></script>
     <script>
         const token = localStorage.getItem('token');
         if (!token) {
             window.location.href = 'login.html';
         }
-    </script>
-    <script src="validar_permisos.js"></script>
-    <script>
+        
         const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
         const tienePermiso = usuario.permisos?.cronograma || usuario.username === 'admin';
         
@@ -134,12 +133,12 @@
                         <label>Equipo:</label>
                         <input type="text" id="equipo" placeholder="Ej: Arco en C" required>
                     </div>
-                     <div class="form-group">
-                      <label>Cliente:</label>
-                      <select id="cliente_id" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd;" required>
-                        <option value="">Seleccione un cliente...</option>
-                            </select>
-                              </div>
+                    <div class="form-group">
+                        <label>Cliente:</label>
+                        <select id="cliente_id" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd;" required>
+                            <option value="">Seleccione un cliente...</option>
+                        </select>
+                    </div>
                     <div class="form-group">
                         <label>Ubicación:</label>
                         <input type="text" id="ubicacion" placeholder="Ej: Bogotá" required>
@@ -207,7 +206,7 @@
                     </thead>
                     <tbody id="cronogramaBody">
                         <tr>
-                            <td colspan="11" class="loading">Cargando equipos...<\/td>
+                            <td colspan="11" class="loading">Cargando equipos...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -224,6 +223,7 @@
         </div>
     </div>
 
+    <!-- Modal de Detalles -->
     <div id="detalleModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -232,6 +232,47 @@
             </div>
             <div class="modal-body" id="detalleBody">
                 <div class="loading">Cargando detalles...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Edición -->
+    <div id="editEquipoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>✏️ Editar Equipo</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="editEquipoForm">
+                    <input type="hidden" id="edit-id">
+                    
+                    <label>Equipo:</label>
+                    <input type="text" id="edit-equipo" required>
+                    
+                    <label>Cliente:</label>
+                    <select id="edit-cliente_id" required></select>
+                    
+                    <label>Ubicación:</label>
+                    <input type="text" id="edit-ubicacion" required>
+                    
+                    <label>Garantía Inicio:</label>
+                    <input type="date" id="edit-garantia_inicio" required>
+                    
+                    <label>Garantía Fin:</label>
+                    <input type="date" id="edit-garantia_fin" required>
+                    
+                    <label>Mtto. Pendientes:</label>
+                    <input type="number" id="edit-mtos_pendientes">
+                    
+                    <label>Mtto. Realizados:</label>
+                    <input type="number" id="edit-mtos_realizados">
+                    
+                    <label>Observaciones:</label>
+                    <textarea id="edit-observaciones"></textarea>
+                    
+                    <button type="submit" class="btn-guardar">Actualizar</button>
+                </form>
             </div>
         </div>
     </div>

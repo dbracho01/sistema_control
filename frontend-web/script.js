@@ -147,6 +147,7 @@ async function cargarEquipos() {
     }
 }
 
+
 function renderizarPagina() {
     const tbody = document.getElementById('cronogramaBody');
     const totalPaginas = Math.ceil(todosLosEquipos.length / equiposPorPagina);
@@ -261,7 +262,7 @@ async function editarEquipo(id) {
         const equipo = await response.json();
         
         document.getElementById('equipo').value = equipo.equipo || '';
-        document.getElementById('cliente').value = equipo.cliente || '';
+        document.getElementById('cliente_id').value = equipo.cliente_id || '';
         document.getElementById('ubicacion').value = equipo.ubicacion || '';
         document.getElementById('garantia_inicio').value = equipo.garantia_inicio || '';
         document.getElementById('garantia_fin').value = equipo.garantia_fin || '';
