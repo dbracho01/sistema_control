@@ -420,7 +420,6 @@
                 </div>
                 
                 <form id="reporteForm">
-                    <input type="hidden" id="reporte_id" value="">
                     <div class="form-section">
                         <h3>Información General</h3>
                         <div class="form-row">
@@ -560,13 +559,14 @@
                             </div>
                         </div>
                     </div>
-                     <div class="form-section">
-                        <h3>Titulo</h3>
+                    
+                    <div class="form-section">
+                        <h3 style="text-align: center; font-size: 1.3em;">Comentarios</h3>
                         <div class="form-field">
-                            <textarea id="observaciones" rows="4" placeholder="Observaciones adicionales..."></textarea>
+                            <textarea id="comentarios" rows="4" placeholder="Escriba sus comentarios aquí..." style="width: 100%;"></textarea>
                         </div>
                     </div>
-                                                           
+                    
                     <div class="form-section">
                         <h3>Descripción del Problema / Falla</h3>
                         <div class="form-field">
@@ -580,29 +580,93 @@
                             <textarea id="accesorios" rows="4" placeholder="Indique los accesorios o partes involucradas..."></textarea>
                         </div>
                     </div>
-                                  
                     
                     <div class="form-section">
-                        <h3>Materiales / Repuestos Utilizados</h3>
-                        <table class="material-table" id="materialesTable">
-                            <thead>
-                                <tr>
-                                    <th>Descripción</th>
-                                    <th>Cantidad</th>
-                                    <th>Referencia</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody id="materialesBody">
-                                <tr class="material-row">
-                                    <td><input type="text" name="material_desc[]" placeholder="Descripción"></td>
-                                    <td><input type="number" name="material_cant[]" placeholder="Cant." min="1" style="width: 70px;"></td>
-                                    <td><input type="text" name="material_ref[]" placeholder="Referencia"></td>
-                                    <td><button type="button" class="btn-accion eliminar" onclick="eliminarFilaMaterial(this)">🗑️</button></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <button type="button" class="btn-agregar-material" onclick="agregarFilaMaterial()">+ Agregar material</button>
+                        <h3>Observaciones</h3>
+                        <div class="form-field">
+                            <textarea id="observaciones" rows="4" placeholder="Observaciones adicionales..."></textarea>
+                        </div>
+                    </div>
+                    
+                   <div class="form-section">
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                      <h3 style="margin: 0;">Materiales / Repuestos Utilizados</h3>
+                         <select id="moneda_select" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #ddd;">
+                             <option value="USD">🇺🇸 Dólar Americano (USD $)</option>
+                             <option value="COP" selected>🇨🇴 Peso Colombiano (COP $)</option>
+                             <option value="EUR">🇪🇺 Euro (EUR €)</option>
+                             <option value="VES">🇻🇪 Bolívar (VES Bs)</option>
+                         </select>
+                     </div>
+    
+                   <table class="material-table" id="materialesTable">
+                        <thead>
+                          <tr>
+                             <th>Descripción</th>
+                             <th>Cantidad</th>
+                             <th>Precio Unitario</th>
+                             <th>Referencia</th>
+                             <th></th>
+                         </tr>
+                       </thead>
+                       <tbody id="materialesBody">
+                          <tr class="material-row">
+                            <td><input type="text" name="material_desc[]" placeholder="Descripción"></td>
+                            <td><input type="number" name="material_cant[]" placeholder="Cant." min="1" style="width: 70px;"></td>
+                            <td><input type="number" name="material_precio[]" placeholder="Precio" step="0.01" style="width: 100px;"></td>
+                            <td><input type="text" name="material_ref[]" placeholder="Referencia"></td>
+                            <td><button type="button" class="btn-accion eliminar" onclick="eliminarFilaMaterial(this)">🗑️</button></td>
+                         </tr>
+                      </tbody>
+                     </table>
+                       <button type="button" class="btn-agregar-material" onclick="agregarFilaMaterial()">+ Agregar material</button>
+                       </div>
+                             <div class="form-section">
+                        <h3>💰 Costos del Servicio</h3>
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label>Mano de Obra (COP)</label>
+                                <input type="number" id="costo_mano_obra" step="0.01" value="0" placeholder="Ej: 150000">
+                            </div>
+                            <div class="form-field">
+                                <label>Repuestos (COP)</label>
+                                <input type="number" id="costo_repuestos" step="0.01" value="0" placeholder="Ej: 80000">
+                            </div>
+                            <div class="form-field">
+                                <label>Horas Trabajadas</label>
+                                <input type="number" id="horas_trabajadas" step="0.5" value="0" placeholder="Ej: 4.5">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label>Ingreso Generado (COP)</label>
+                                <input type="number" id="ingreso_generado" step="0.01" value="0" placeholder="Ej: 500000">
+                            </div>
+                            <div class="form-field">
+                                <label>Ahorro por evitar fallos (COP)</label>
+                                <input type="number" id="ahorro_fallos" step="0.01" value="0" placeholder="Ej: 200000">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">  <!-- Línea 625: inicio de Firmas -->
+                        <h3>Firmas</h3>        <!-- Línea 626 -->
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label>Nombre del Técnico</label>
+                                <input type="text" id="firma_tecnico_nombre" placeholder="Nombre del técnico">
+                            </div>
+                            <div class="form-field">
+                                <label>Nombre del Cliente</label>
+                                <input type="text" id="firma_cliente_nombre" placeholder="Nombre quien firma">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-field">
+                                <label>OPR (si aplica)</label>
+                                <input type="text" id="firma_opr_nombre" placeholder="Nombre OPR">
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="form-section">

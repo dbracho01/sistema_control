@@ -3,28 +3,47 @@ const API_URL = 'http://127.0.0.1:8000';
 
 console.log("🚀 Script de reportes cargado correctamente");
 
-// Variable para el contador de reportes
+// Variable para el contador de reportes (Generación PDF)
 let contadorReporte = 1001;
 
 document.addEventListener('DOMContentLoaded', async () => {
     console.log("📅 DOM cargado, inicializando formulario");
     await obtenerUltimoReporte();
-    document.getElementById('fecha').valueAsDate = new Date();
-    document.getElementById('hora').value = new Date().toTimeString().slice(0,5);
+    
+    // Asignar fecha y hora actual por defecto al formulario
+    if(document.getElementById('fecha')) document.getElementById('fecha').valueAsDate = new Date();
+    if(document.getElementById('hora')) document.getElementById('hora').value = new Date().toTimeString().slice(0,5);
+    
+    // Inicializar selectores y tablas
+    await cargarEquiposEnSelector();
+    await cargarListaReportes();
+
+    // VINCULACIÓN CRÍTICA: Asignar el evento click al botón "Guardar Reporte"
+    const btnGuardar = document.getElementById('btnGuardarReporte');
+    if (btnGuardar) {
+        btnGuardar.addEventListener('click', guardarYListarReporte);
+    }
 });
 
+// Obtiene el consecutivo visual para el PDF temporal
 async function obtenerUltimoReporte() {
     try {
-        document.getElementById('reporteNumero').textContent = `ST-${contadorReporte}`;
-        console.log(`📄 Número de reporte inicial: ST-${contadorReporte}`);
+        const numeroElement = document.getElementById('reporteNumero');
+        if (numeroElement) {
+            numeroElement.textContent = `ST-${contadorReporte}`;
+            console.log(`📄 Número de reporte inicial: ST-${contadorReporte}`);
+        }
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error al inicializar número de reporte:', error);
     }
 }
 
+// Control dinámico de la tabla de materiales
 function agregarFilaMaterial() {
     console.log("➕ Agregando fila de material");
     const tbody = document.getElementById('materialesBody');
+    if (!tbody) return;
+    
     const newRow = document.createElement('tr');
     newRow.className = 'material-row';
     newRow.innerHTML = `
@@ -45,15 +64,15 @@ function eliminarFilaMaterial(btn) {
     }
 }
 
+// =======================================================
+// ACCIÓN 1: SUBMIT DEL FORMULARIO - GENERACIÓN DE PDF
+// =======================================================
 document.getElementById('reporteForm').addEventListener('submit', async (e) => {
     e.preventDefault();
+    console.log("📤 Enviando formulario para Generar PDF...");
     
-    console.log("📤 Enviando formulario...");
-    
-    // Recolectar materiales
     const materiales = [];
-    const filas = document.querySelectorAll('.material-row');
-    filas.forEach(fila => {
+    document.querySelectorAll('.material-row').forEach(fila => {
         const desc = fila.querySelector('input[name="material_desc[]"]')?.value;
         const cant = fila.querySelector('input[name="material_cant[]"]')?.value;
         const ref = fila.querySelector('input[name="material_ref[]"]')?.value;
@@ -67,85 +86,49 @@ document.getElementById('reporteForm').addEventListener('submit', async (e) => {
         }
     });
     
-    // Recolectar TODOS los datos del formulario
-const datos = {
-    // Información básica
-    numero_reporte: document.getElementById('reporteNumero').textContent,
-    fecha: document.getElementById('fecha').value,
-    hora: document.getElementById('hora').value,
-    horas: document.getElementById('horas')?.value || '',
-    dias: document.getElementById('dias')?.value || '',
-    tecnico: document.getElementById('tecnico')?.value || '',
-    
-    // SERVICIOS - Checkboxes
-    servicio_instalacion: document.getElementById('servicio_instalacion')?.checked || false,
-    servicio_preventivo: document.getElementById('servicio_preventivo')?.checked || false,
-    servicio_correctivo: document.getElementById('servicio_correctivo')?.checked || false,
-    servicio_asesoria: document.getElementById('servicio_asesoria')?.checked || false,
-    servicio_consulta: document.getElementById('servicio_consulta')?.checked || false,
-    servicio_otros: document.getElementById('servicio_otros')?.checked || false,
-    servicio_otros_especifique: document.getElementById('servicio_otros_especifique')?.value || '',
-    
-    // EQUIPO - Checkboxes
-    equipo_nuevo: document.getElementById('equipo_nuevo')?.checked || false,
-    equipo_usado: document.getElementById('equipo_usado')?.checked || false,
-    
-    // INSTITUCIÓN - Textos
-    institucion: document.getElementById('institucion')?.value || '',
-    servicio_texto: document.getElementById('servicio_texto')?.value || '',
-    responsable_texto: document.getElementById('responsable_texto')?.value || '',
-    
-    // CONTACTO - NUEVOS CAMPOS
-    direccion: document.getElementById('direccion')?.value || '',
-    ciudad: document.getElementById('ciudad')?.value || '',
-    telefono: document.getElementById('telefono')?.value || '',
-    
-    // DATOS DEL EQUIPO - Textos
-    equipo_nombre: document.getElementById('equipo_nombre')?.value || '',
-    equipo_marca: document.getElementById('equipo_marca')?.value || '',
-    equipo_modelo: document.getElementById('equipo_modelo')?.value || '',
-    equipo_serie: document.getElementById('equipo_serie')?.value || '',
-    
-    // COMENTARIOS
-    comentarios: document.getElementById('comentarios')?.value || '',
-    
-    // DESCRIPCIÓN
-    descripcion_problema: document.getElementById('descripcion_problema')?.value || '',
-    
-    // ACCESORIOS
-    accesorios: document.getElementById('accesorios')?.value || '',
-    
-    // OBSERVACIONES
-    observaciones: document.getElementById('observaciones')?.value || '',
-    
-    // MATERIALES
-    materiales: materiales,
-    
-    // FIRMAS
-    firma_tecnico: document.getElementById('firma_tecnico_nombre')?.value || '',
-    firma_cliente: document.getElementById('firma_cliente_nombre')?.value || '',
-    firma_opr: document.getElementById('firma_opr_nombre')?.value || ''
-};
-    
-    console.log('📦 Datos enviados al backend:', JSON.stringify(datos, null, 2));
+    const datos = {
+        numero_reporte: document.getElementById('reporteNumero').textContent,
+        fecha: document.getElementById('fecha').value,
+        hora: document.getElementById('hora').value,
+        horas: document.getElementById('horas')?.value || '',
+        dias: document.getElementById('dias')?.value || '',
+        tecnico: document.getElementById('tecnico')?.value || '',
+        servicio_instalacion: document.getElementById('servicio_instalacion')?.checked || false,
+        servicio_preventivo: document.getElementById('servicio_preventivo')?.checked || false,
+        servicio_correctivo: document.getElementById('servicio_correctivo')?.checked || false,
+        servicio_asesoria: document.getElementById('servicio_asesoria')?.checked || false,
+        servicio_consulta: document.getElementById('servicio_consulta')?.checked || false,
+        servicio_otros: document.getElementById('servicio_otros')?.checked || false,
+        equipo_nuevo: document.getElementById('equipo_nuevo')?.checked || false,
+        equipo_usado: document.getElementById('equipo_usado')?.checked || false,
+        institucion: document.getElementById('institucion')?.value || '',
+        servicio_texto: document.getElementById('servicio_texto')?.value || '',
+        responsable_texto: document.getElementById('responsable_texto')?.value || '',
+        direccion: document.getElementById('direccion')?.value || '',
+        ciudad: document.getElementById('ciudad')?.value || '',
+        telefono: document.getElementById('telefono')?.value || '',
+        equipo_nombre: document.getElementById('equipo_nombre')?.value || '',
+        equipo_marca: document.getElementById('equipo_marca')?.value || '',
+        equipo_modelo: document.getElementById('equipo_modelo')?.value || '',
+        equipo_serie: document.getElementById('equipo_serie')?.value || '',
+        descripcion_problema: document.getElementById('descripcion_problema')?.value || '',
+        accesorios: document.getElementById('accesorios')?.value || '',
+        observaciones: document.getElementById('observaciones')?.value || '',
+        materiales: materiales,
+        firma_tecnico: document.getElementById('firma_tecnico_nombre')?.value || '',
+        firma_cliente: document.getElementById('firma_cliente_nombre')?.value || '',
+        firma_opr: document.getElementById('firma_opr_nombre')?.value || ''
+    };
     
     try {
-        console.log(`🌐 Enviando petición a ${API_URL}/generar-pdf-desde-plantilla`);
-        
         const response = await fetch(`${API_URL}/generar-pdf-desde-plantilla`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(datos)
         });
         
-        console.log(`📥 Respuesta recibida. Status: ${response.status}`);
-        
         if (response.ok) {
-            console.log("✅ PDF generado correctamente, descargando...");
-            
             const blob = await response.blob();
-            console.log(`📦 Tamaño del PDF: ${blob.size} bytes`);
-            
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -157,19 +140,17 @@ const datos = {
             
             contadorReporte++;
             document.getElementById('reporteNumero').textContent = `ST-${contadorReporte}`;
-            
-            alert('✅ Reporte generado correctamente');
+            alert('✅ PDF generado e impreso correctamente');
         } else {
-            const errorText = await response.text();
-            console.error('❌ Error en respuesta:', errorText);
-            alert('❌ Error al generar el reporte');
+            alert('❌ Error al generar el PDF del reporte');
         }
     } catch (error) {
-        console.error('❌ Error de conexión:', error);
-        alert('❌ Error de conexión con el servidor');
+        console.error('❌ Error:', error);
+        alert('❌ Error de conexión al generar PDF');
     }
 });
-// Cargar equipos en el selector
+
+// Cargar catálogo de equipos en el tag <select>
 async function cargarEquiposEnSelector() {
     try {
         const response = await fetch(`${API_URL}/equipos`);
@@ -188,106 +169,191 @@ async function cargarEquiposEnSelector() {
     }
 }
 
-// Llamar la función cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', () => {
-    cargarEquiposEnSelector();
-});
-
-// Función para guardar reporte
+// =======================================================
+// ACCIÓN 2: GUARDAR O ACTUALIZAR REPORTE EN LA BD
+// =======================================================
 async function guardarYListarReporte(event) {
     event.preventDefault();
+    console.log("💾 Ejecutando guardarYListarReporte...");
     
-    // Obtener equipo seleccionado
+    const btnGuardar = document.getElementById('btnGuardarReporte');
+    const editandoId = btnGuardar.getAttribute('data-edit-id');
+    
     const equipoSelect = document.getElementById('equipo_select');
     const equipoId = equipoSelect ? equipoSelect.value : null;
     
     if (!equipoId) {
-        alert('❌ Seleccione un equipo');
+        alert('❌ Seleccione un equipo obligatoriamente');
         return;
     }
     
-    // Determinar tipo de intervención
+    // Determinar tipo de intervención basada en los checkboxes
     let tipoIntervencion = "Preventivo";
     if (document.getElementById('servicio_correctivo')?.checked) tipoIntervencion = "Correctivo";
     else if (document.getElementById('servicio_instalacion')?.checked) tipoIntervencion = "Instalación";
     else if (document.getElementById('servicio_asesoria')?.checked) tipoIntervencion = "Asesoría";
     else if (document.getElementById('servicio_consulta')?.checked) tipoIntervencion = "Consulta";
     
-    // Obtener materiales
+    // Recolectar materiales de la tabla dinámica
     const materiales = [];
     document.querySelectorAll('.material-row').forEach(row => {
         const descripcion = row.querySelector('input[name="material_desc[]"]')?.value;
         if (descripcion) {
             materiales.push({
                 descripcion: descripcion,
-                cantidad: row.querySelector('input[name="material_cant[]"]')?.value,
-                referencia: row.querySelector('input[name="material_ref[]"]')?.value
+                cantidad: row.querySelector('input[name="material_cant[]"]')?.value || '1',
+                precio_unitario: '0', 
+                referencia: row.querySelector('input[name="material_ref[]"]')?.value || ''
             });
         }
     });
     
+    // Mapeo al esquema esperado por la tabla 'intervenciones' de tu backend
     const datos = {
         equipo_id: parseInt(equipoId),
         fecha: document.getElementById('fecha').value,
         hora_inicio: document.getElementById('hora').value || "00:00",
         hora_fin: document.getElementById('hora').value || "00:00",
         tipo_intervencion: tipoIntervencion,
-        descripcion: document.getElementById('descripcion_problema')?.value || document.getElementById('comentarios')?.value || "",
+        descripcion: document.getElementById('descripcion_problema')?.value || "",
         tecnico: document.getElementById('tecnico').value,
-        costo_mano_obra: parseFloat(document.getElementById('costo_mano_obra')?.value) || 0,
+        costo_mano_obra: 0,
         costo_repuestos: 0,
-        ingreso_generado: parseFloat(document.getElementById('ingreso_generado')?.value) || 0,
-        ahorro_fallos: parseFloat(document.getElementById('ahorro_fallos')?.value) || 0,
+        ingreso_generado: 0,
+        ahorro_fallos: 0,
         materiales: materiales
     };
     
     try {
-        const response = await fetch(`${API_URL}/intervenciones`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(datos)
-        });
+        let response;
+        if (editandoId) {
+            console.log(`📝 Enviando PUT para actualizar reporte ID: ${editandoId}`);
+            response = await fetch(`${API_URL}/intervenciones/${editandoId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(datos)
+            });
+        } else {
+            console.log(`➕ Enviando POST para nuevo reporte...`);
+            response = await fetch(`${API_URL}/intervenciones`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(datos)
+            });
+        }
         
         if (response.ok) {
-            alert('✅ Reporte guardado exitosamente');
+            alert(editandoId ? '✅ Reporte actualizado correctamente' : '✅ Reporte guardado en la base de datos');
             
-            // Incrementar número de reporte
-            let numActual = parseInt(document.getElementById('reporteNumero').textContent.split('-')[1]);
-            numActual++;
-            document.getElementById('reporteNumero').textContent = `ST-${numActual}`;
-            localStorage.setItem('reporteContador', numActual);
+            // Reestablecer el botón a su estado de guardado original
+            btnGuardar.textContent = '💾 Guardar Reporte';
+            btnGuardar.style.background = "#10b981";
+            btnGuardar.removeAttribute('data-edit-id');
             
-            // Limpiar formulario
-            document.getElementById('tecnico').value = '';
-            document.getElementById('descripcion_problema').value = '';
-            document.getElementById('comentarios').value = '';
-            document.getElementById('equipo_select').value = '';
+            // Limpiar y restaurar valores por defecto del formulario
+            document.getElementById('reporteForm').reset();
+            document.getElementById('fecha').valueAsDate = new Date();
+            document.getElementById('hora').value = new Date().toTimeString().slice(0,5);
             
-            // Recargar lista de reportes
-            if (typeof cargarListaReportes === 'function') {
-                await cargarListaReportes();
+            // Limpiar tabla de materiales dejando una fila inicial limpia
+            const tbody = document.getElementById('materialesBody');
+            if (tbody) {
+                tbody.innerHTML = `
+                    <tr class="material-row">
+                        <td><input type="text" name="material_desc[]" placeholder="Descripción"></td>
+                        <td><input type="number" name="material_cant[]" placeholder="Cant." min="1" style="width: 70px;"></td>
+                        <td><input type="text" name="material_ref[]" placeholder="Referencia"></td>
+                        <td><button type="button" class="btn-accion eliminar" onclick="eliminarFilaMaterial(this)">🗑️</button></td>
+                    </tr>
+                `;
             }
+            
+            // Actualizar la lista de reportes en la parte inferior
+            await cargarListaReportes();
         } else {
-            const error = await response.json();
-            alert('❌ Error al guardar: ' + JSON.stringify(error));
+            alert('❌ Error al guardar el reporte en el servidor');
         }
     } catch (error) {
-        console.error('Error:', error);
-        alert('❌ Error de conexión');
+        console.error('Error en el envío:', error);
+        alert('❌ Error de conexión con el backend al intentar guardar');
     }
 }
 
-// Conectar el botón guardar
-document.addEventListener('DOMContentLoaded', () => {
-    const btnGuardar = document.getElementById('btnGuardarReporte');
-    if (btnGuardar) {
-        btnGuardar.addEventListener('click', guardarYListarReporte);
-        console.log('✅ Botón guardar conectado');
-    } else {
-        console.log('❌ Botón guardar no encontrado');
+// =======================================================
+// ACCIÓN 3: CARGAR REPORTE EN EL FORMULARIO PARA EDITAR
+// =======================================================
+async function editarReporte(id) {
+    console.log(`🔍 Buscando datos en BD para editar reporte ID: ${id}`);
+    try {
+        const response = await fetch(`${API_URL}/intervenciones/${id}`);
+        if (!response.ok) throw new Error("No se pudo obtener el reporte seleccionado");
+        const r = await response.json();
+        
+        // Alterar el botón de Guardar para habilitar el envío 'PUT'
+        const btnGuardar = document.getElementById('btnGuardarReporte');
+        if (btnGuardar) {
+            btnGuardar.setAttribute('data-edit-id', id);
+            btnGuardar.textContent = '🔄 Actualizar Reporte';
+            btnGuardar.style.background = '#f59e0b'; // Color naranja de edición
+        }
+        
+        // Mapear los datos de la base de datos a los inputs HTML correspondientes
+        if (document.getElementById('fecha')) document.getElementById('fecha').value = r.fecha;
+        if (document.getElementById('hora')) document.getElementById('hora').value = r.hora_inicio || '00:00';
+        if (document.getElementById('tecnico')) document.getElementById('tecnico').value = r.tecnico || '';
+        if (document.getElementById('descripcion_problema')) document.getElementById('descripcion_problema').value = r.descripcion || '';
+        if (document.getElementById('equipo_select')) document.getElementById('equipo_select').value = r.equipo_id;
+
+        // Resetear todos los checkboxes de servicio y marcar el correcto
+        const servicios = ['servicio_preventivo', 'servicio_correctivo', 'servicio_instalacion', 'servicio_asesoria', 'servicio_consulta'];
+        servicios.forEach(s => { if(document.getElementById(s)) document.getElementById(s).checked = false; });
+
+        if (r.tipo_intervencion === "Preventivo" && document.getElementById('servicio_preventivo')) document.getElementById('servicio_preventivo').checked = true;
+        if (r.tipo_intervencion === "Correctivo" && document.getElementById('servicio_correctivo')) document.getElementById('servicio_correctivo').checked = true;
+        if (r.tipo_intervencion === "Instalación" && document.getElementById('servicio_instalacion')) document.getElementById('servicio_instalacion').checked = true;
+        if (r.tipo_intervencion === "Asesoría" && document.getElementById('servicio_asesoria')) document.getElementById('servicio_asesoria').checked = true;
+        if (r.tipo_intervencion === "Consulta" && document.getElementById('servicio_consulta')) document.getElementById('servicio_consulta').checked = true;
+
+        // Repoblar dinámicamente las filas de materiales guardados
+        const tbody = document.getElementById('materialesBody');
+        if (tbody) {
+            tbody.innerHTML = ''; // Limpiar filas preexistentes
+            
+            if (r.materiales && r.materiales.length > 0) {
+                r.materiales.forEach(m => {
+                    const newRow = document.createElement('tr');
+                    newRow.className = 'material-row';
+                    newRow.innerHTML = `
+                        <td><input type="text" name="material_desc[]" value="${m.descripcion || ''}"></td>
+                        <td><input type="number" name="material_cant[]" value="${m.cantidad || 1}" min="1" style="width: 70px;"></td>
+                        <td><input type="text" name="material_ref[]" value="${m.referencia || ''}"></td>
+                        <td><button type="button" class="btn-accion eliminar" onclick="eliminarFilaMaterial(this)">🗑️</button></td>
+                    `;
+                    tbody.appendChild(newRow);
+                });
+            } else {
+                // Si no hay materiales guardados, renderizar una fila vacía estándar
+                tbody.innerHTML = `
+                    <tr class="material-row">
+                        <td><input type="text" name="material_desc[]" placeholder="Descripción"></td>
+                        <td><input type="number" name="material_cant[]" placeholder="Cant." min="1" style="width: 70px;"></td>
+                        <td><input type="text" name="material_ref[]" placeholder="Referencia"></td>
+                        <td><button type="button" class="btn-accion eliminar" onclick="eliminarFilaMaterial(this)">🗑️</button></td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Auto-scroll fluido hacia arriba para facilitar la edición inmediata al usuario
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    } catch (error) {
+        console.error('Error al cargar reporte para edición:', error);
+        alert('❌ Error al cargar los datos del reporte');
     }
-});
-// Cargar lista de reportes guardados
+}
+
+// Cargar la lista inferior de reportes guardados en la BD
 async function cargarListaReportes() {
     const container = document.getElementById('listaReportes');
     if (!container) return;
@@ -313,7 +379,6 @@ async function cargarListaReportes() {
                         <th style="padding: 10px;">Equipo</th>
                         <th style="padding: 10px;">Tipo</th>
                         <th style="padding: 10px;">Técnico</th>
-                        <th style="padding: 10px;">Horas</th>
                         <th style="padding: 10px;">Acciones</th>
                     </tr>
                 </thead>
@@ -329,9 +394,9 @@ async function cargarListaReportes() {
                     <td style="padding: 8px;">${r.equipo_nombre || 'Equipo #' + r.equipo_id}</td>
                     <td style="padding: 8px;">${r.tipo_intervencion}</td>
                     <td style="padding: 8px;">${r.tecnico || '-'}</td>
-                    <td style="padding: 8px;">${r.horas_parada} hrs</td>
                     <td style="padding: 8px;">
                         <button class="btn-accion ver" onclick="verReporte(${r.id})">👁️</button>
+                        <button class="btn-accion editar" onclick="editarReporte(${r.id})">✏️</button>
                         <button class="btn-accion eliminar" onclick="eliminarReporte(${r.id})">🗑️</button>
                     </td>
                 </tr>
@@ -342,32 +407,30 @@ async function cargarListaReportes() {
         container.innerHTML = html;
         
     } catch (error) {
-        console.error('Error:', error);
-        container.innerHTML = '<div class="loading">Error al cargar reportes</div>';
+        console.error('Error al renderizar tabla de reportes:', error);
+        container.innerHTML = '<div class="loading">Error al cargar reportes guardados</div>';
     }
 }
 
-// Función para ver reporte
+// Abrir vista del PDF guardado
 function verReporte(id) {
-    window.open(`http://127.0.0.1:8000/ver-reporte/${id}`, '_blank');
+    window.open(`${API_URL}/ver-reporte/${id}`, '_blank');
 }
 
-// Función para eliminar reporte
+// Eliminar registro físico de la BD
 async function eliminarReporte(id) {
-    if (!confirm('¿Eliminar este reporte?')) return;
+    if (!confirm('¿Está seguro de que desea eliminar este reporte de forma permanente?')) return;
     try {
         const response = await fetch(`${API_URL}/intervenciones/${id}`, { method: 'DELETE' });
         if (response.ok) {
-            alert('✅ Reporte eliminado');
-            cargarListaReportes();
+            alert('✅ Reporte eliminado con éxito');
+            await cargarListaReportes();
         } else {
-            alert('❌ Error al eliminar');
+            alert('❌ Error al eliminar el reporte del servidor');
         }
     } catch (error) {
-        alert('Error de conexión');
+        console.error('Error al borrar registro:', error);
+        alert('Error de conexión con el servidor');
     }
 }
-// Forzar carga de reportes después de 1 segundo
-setTimeout(() => {
-    cargarListaReportes();
-}, 1000);
+

@@ -1,73 +1,6 @@
-cd ~/Escritorio/sistema_control/frontend-web
-cat > validar_permisos.js << 'EOF'
-const API_URL = 'http://localhost:8000';
 
-function getUsuario() {
-    const usuario = localStorage.getItem('usuario');
-    return usuario ? JSON.parse(usuario) : null;
-}
-
-function getToken() {
-    return localStorage.getItem('token');
-}
-
-function isAuthenticated() {
-    const token = getToken();
-    if (!token) {
-        window.location.href = 'login.html';
-        return false;
-    }
+function initPage(m) {
     return true;
-}
-
-function hasPermission(modulo) {
-    const usuario = getUsuario();
-    if (!usuario) return false;
-    if (usuario.username === 'admin') return true;
-    return usuario.permisos?.[modulo] || false;
-}
-
-function applyPermissionsToTabs() {
-    const usuario = getUsuario();
-    if (!usuario) return;
-    
-    const permisoMap = {
-        'Cronograma': 'cronograma',
-        'Reportes': 'reportes',
-        'Cotizaciones': 'cotizaciones',
-        'Clientes': 'clientes',
-        'Productos': 'productos',
-        'Propuestas': 'propuestas',
-        'Admin': 'usuarios'
-    };
-    
-    document.querySelectorAll('.tab').forEach(tab => {
-        const texto = tab.textContent.trim();
-        
-        if (texto.includes('Cerrar') || texto.includes('🔒')) {
-            tab.style.display = 'inline-flex';
-            return;
-        }
-        
-        if (texto === 'Admin') {
-            if (!usuario.permisos?.usuarios && usuario.username !== 'admin') {
-                tab.style.display = 'none';
-            }
-            return;
-        }
-        
-        let mostrar = false;
-        for (const [nombreModulo, permisoKey] of Object.entries(permisoMap)) {
-            if (texto.includes(nombreModulo)) {
-                mostrar = usuario.permisos?.[permisoKey] === true || usuario.username === 'admin';
-                break;
-            }
-        }
-        
-        if (!mostrar) {
-            tab.style.display = 'none';
-        }
-    });
 }
 
 function cerrarSesion() {
@@ -76,21 +9,6 @@ function cerrarSesion() {
     window.location.href = 'login.html';
 }
 
-function initPage(moduloRequerido) {
-    if (!isAuthenticated()) return false;
-    
-    if (moduloRequerido && !hasPermission(moduloRequerido)) {
-        return false;
-    }
-    
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(function() { applyPermissionsToTabs(); }, 100);
-        });
-    } else {
-        setTimeout(function() { applyPermissionsToTabs(); }, 100);
-    }
-    
-    return true;
+function editarReporte(id) {
+    alert('Editando ST-' + id);
 }
-EOF
