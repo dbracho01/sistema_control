@@ -158,6 +158,35 @@
             cursor: pointer;
             transition: background 0.2s;
         }
+         .pagination-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #e2e8f0;
+            flex-wrap: wrap;
+            gap: 10px;
+         }
+
+         .pagination-info {
+          color: #64748b;
+          font-size: 14px;
+         }
+
+         .pagination-controls {
+         display: flex;
+         align-items: center;
+         gap: 8px;
+         }
+
+         .pagination-numbers {
+         display: flex;
+         gap: 5px;
+         }
+
+
+         
         
         .btn-generar:hover {
             background: #1d4ed8;
@@ -642,18 +671,34 @@
                     <div id="listaReportes">
                         <div class="loading">Cargando reportes...</div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="/reportes.js"></script>
-    <script>
-        function cerrarSesion() {
-            localStorage.removeItem('token');
-            localStorage.removeItem('usuario');
-            window.location.href = 'login.html';
-        }
+                    <div id="listaReportes">
+                     <div class="loading">Cargando reportes...</div>
+                     </div>
+                       <div class="pagination-container">
+                         <div class="pagination-info" id="paginationInfo">
+                          Mostrando 0-0 de 0 reportes
+                             </div>
+                               <div class="pagination-controls" id="paginationControls">
+                                <button class="pagination-btn" id="prevPage" disabled>
+                                   ◀ Anterior
+                                   </button>
+                                     <div class="pagination-numbers" id="paginationNumbers"></div>
+                                      <button class="pagination-btn" id="nextPage" disabled>
+                                       Siguiente ▶
+                                        </button>
+                                           </div>
+                                           </div>
+                                              </div>
+                                              </div>
+                                                </div>
+                                                    </div>
+                                                   <script src="/reportes.js"></script>
+                                                   <script>
+                                                    function cerrarSesion() {
+                                                    localStorage.removeItem('token');
+                                                     localStorage.removeItem('usuario');
+                                                      window.location.href = 'login.html';
+                                                      }
     </script>
 </body>
 </html>

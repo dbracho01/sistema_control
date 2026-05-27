@@ -1280,7 +1280,63 @@ def eliminar_intervencion(intervencion_id: int, db: Session = Depends(get_db)):
     except Exception as e:
         print(f"Error en DELETE /intervenciones/{intervencion_id}: {e}")
         return {"error": str(e)}
+@app.delete("/intervenciones/{intervencion_id}")
+def eliminar_intervencion(intervencion_id: int, db: Session = Depends(get_db)):
+    try:
+        from models.indicadores import Intervencion
+        from fastapi.responses import JSONResponse
+        
+        intervencion = db.query(Intervencion).filter(Intervencion.id == intervencion_id).first()
+        if not intervencion:
+            return JSONResponse(status_code=404, content={"error": "Intervención no encontrada"})
+        
+        db.delete(intervencion)
+        db.commit()
+        return {"mensaje": "Intervención eliminada correctamente"}
+    except Exception as e:
+        print(f"Error en DELETE /intervenciones/{intervencion_id}: {e}")
+        return {"error": str(e)}
 
+# 👇 AGREGAR AQUÍ el nuevo endpoint PUT 👇
+@app.put("/intervenciones/{intervencion_id}")
+def actualizar_intervencion(intervencion_id: int, intervencion: IntervencionCreate, db: Session = Depends(get_db)):
+    try:
+        from models.indicadores import Intervencion
+        from datetime import datetime
+        
+        db_intervencion = db.query(Intervencion).filter(Intervencion.id == intervencion_id).first()
+        if not db_intervencion:
+            return {"error": "Intervención no encontrada"}
+        
+        horas_parada = 0
+        if intervencion.hora_inicio and intervencion.hora_fin:
+            try:
+                h1 = datetime.strptime(intervencion.hora_inicio, "%H:%M")
+                h2 = datetime.strptime(intervencion.hora_fin, "%H:%M")
+                horas_parada = (h2 - h1).seconds / 3600
+            except:
+                pass
+        
+        db_intervencion.equipo_id = intervencion.equipo_id
+        db_intervencion.fecha = intervencion.fecha
+        db_intervencion.hora_inicio = intervencion.hora_inicio
+        db_intervencion.hora_fin = intervencion.hora_fin
+        db_intervencion.tipo_intervencion = intervencion.tipo_intervencion
+        db_intervencion.descripcion = intervencion.descripcion
+        db_intervencion.tecnico = intervencion.tecnico
+        db_intervencion.horas_parada = horas_parada
+        db_intervencion.costo_mano_obra = intervencion.costo_mano_obra
+        db_intervencion.costo_repuestos = intervencion.costo_repuestos
+        db_intervencion.costo_total = intervencion.costo_mano_obra + intervencion.costo_repuestos
+        db_intervencion.ingreso_generado = intervencion.ingreso_generado
+        db_intervencion.ahorro_fallos = intervencion.ahorro_fallos
+        
+        db.commit()
+        db.refresh(db_intervencion)
+        return {"mensaje": "Intervención actualizada correctamente", "id": db_intervencion.id}
+    except Exception as e:
+        print(f"Error en PUT /intervenciones/{intervencion_id}: {e}")
+        return {"error": str(e)}
 @app.get("/ver-reporte/{reporte_id}")
 async def ver_reporte(reporte_id: int, db: Session = Depends(get_db)):
     from models.indicadores import Intervencion
@@ -1519,3 +1575,24 @@ async def get_metricas_todos_equipos(db: Session = Depends(get_db)):
             resultados.append(res)
     
     return resultados
+@app.get("/intervenciones/{intervencion_id}")
+def obtener_intervencion(intervencion_id: int, db: Session = Depends(get_db)):
+    try:
+        from models.indicadores import Intervencion
+        from fastapi.responses import JSONResponse
+
+        intervencion = db.query(Intervencion).filter(
+            Intervencion.id == intervencion_id
+        ).first()
+
+        if not intervencion:
+            return JSONResponse(
+                status_code=404,
+                content={"error": "Intervención no encontrada"}
+            )
+
+        return intervencion
+
+    except Exception as e:
+        print(f"Error en GET /intervenciones/{intervencion_id}: {e}")
+        return {"error": str(e)}
