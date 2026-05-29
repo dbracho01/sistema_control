@@ -34,15 +34,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('fecha_validez').value = fechaValidez.toISOString().split('T')[0];
 });
 
-// Configurar event listeners
 function configurarEventListeners() {
-    document.getElementById('propuestaForm').addEventListener('submit', guardarPropuesta);
-    document.getElementById('btnExportarPDF').addEventListener('click', exportarPDF);
-    document.getElementById('btnImprimir').addEventListener('click', imprimirPropuesta);
-    document.getElementById('logo_personalizado').addEventListener('change', manejarLogoPersonalizado);
-    
-    // Eventos para cálculos automáticos
-    document.getElementById('productosBody').addEventListener('input', recalcularTotales);
+    const form = document.getElementById('propuestaForm');
+
+    if (form) {
+        form.addEventListener('submit', guardarPropuesta);
+    }
 }
 
 // Cargar clientes
@@ -490,7 +487,7 @@ async function verPropuesta(id) {
                 <table style="width: 100%; border-collapse: collapse; margin: 15px 0;">
                     <thead><tr style="background: #f1f5f9;"><th>Descripción</th><th>Modelo</th><th>Referencia</th><th>Valor</th><th>Total</th></tr></thead>
                     <tbody>
-                        ${propuesta.productos.map(p => `
+                        ${(Array.isArray(propuesta.productos) ? propuesta.productos : []).map(p => `
                             <tr>
                                 <td>${p.descripcion}</td>
                                 <td>${p.modelo}</td>

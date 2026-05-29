@@ -657,3 +657,28 @@ td {
         opacity: 1;
     }
 }
+.acciones {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    white-space: nowrap;
+}
+
+td .acciones button {
+    display: inline-flex !important;
+    align-items: center;
+}
+.acciones-cell {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.acciones-cell .btn-accion {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+}

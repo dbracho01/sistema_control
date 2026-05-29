@@ -450,11 +450,26 @@
                             </thead>
                             <tbody id="productosBody">
                                 <tr class="producto-row">
-                                    <td><input type="text" class="producto-nombre" placeholder="Nombre del producto"></td>
-                                    <td><input type="text" class="producto-referencia" placeholder="Referencia"></td>
-                                    <td><input type="number" class="producto-cantidad" value="1" min="1" style="width: 80px;">\n                                    <td><input type="number" class="producto-precio" step="0.01" value="0" style="width: 100px;"></td>
-                                    <td class="producto-subtotal">$0.00\n                                    <td class="producto-subtotal">$0.00\n                                    <td><button type="button" class="btn-accion" onclick="eliminarFilaProducto(this)">🗑️</button></td>
-                                </tr>
+                                     <td>
+                                      <input type="text" class="producto-nombre" placeholder="Nombre del producto">
+                                    </td>    
+                                    <td>
+                                      <input type="text" class="producto-referencia" placeholder="Referencia">
+                                    </td>
+                                    <td>
+                                      <input type="number" class="producto-cantidad" value="1" min="1" style="width: 80px;">\n  
+                                    <td> 
+                                      <input type="number" class="producto-precio" step="0.01" value="0" style="width: 100px;">
+                                    </td>
+                                    <td>
+                                       <div class="acciones">
+                                        <button type="button" class="btn-accion ver">👁</button>
+                                        <button type="button" class="btn-accion editar">✏️</button>
+                                        <button type="button" class="btn-accion eliminar" onclick="eliminarFilaProducto(this)">🗑️</button>
+                                    </div>
+                                  </td>
+                                    <td class="producto-subtotal">$0.00</td>
+                                  </tr>
                             </tbody>
                         </table>
                         <button type="button" class="btn-agregar-producto" onclick="agregarFilaProducto()">+ Agregar producto</button>
