@@ -1,3 +1,5 @@
+import os
+
 SECRET_KEY = "tu-clave-secreta-cambiala"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 480

@@ -13,13 +13,13 @@ router = APIRouter(
 # EQUIPOS
 # ================================
 
-router.get("/")
+@router.get("/")
 def get_equipos(
     db: Session = Depends(get_db)
 ):
     return db.query(Cronograma).all()
 
-router.post("/")
+@router.post("/")
 def crear_equipo(
     equipo: EquipoCreate,
     db: Session = Depends(get_db)
@@ -32,7 +32,7 @@ def crear_equipo(
 
     return db_equipo
 
-router.get("/{equipo_id}")
+@router.get("/{equipo_id}")
 def get_equipo(
     equipo_id: int,
     db: Session = Depends(get_db)
@@ -49,7 +49,7 @@ def get_equipo(
 
     return equipo
 
-router.put("/{equipo_id}")
+@router.put("/{equipo_id}")
 def modificar_equipo(
     equipo_id: int,
     equipo: EquipoCreate,
@@ -73,7 +73,7 @@ def modificar_equipo(
 
     return db_equipo
 
-router.delete("/{equipo_id}")
+@router.delete("/{equipo_id}")
 def eliminar_equipo(
     equipo_id: int,
     db: Session = Depends(get_db)

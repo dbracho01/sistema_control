@@ -4,18 +4,75 @@ from sqlalchemy.orm import Session
 from database.db import get_db
 from schemas.index import *
 from functions.auth import *
+from fastapi.responses import JSONResponse
+from passlib.context import CryptContext
+
+router = APIRouter()
+
+# ================================
+# LOGIN
+# ================================
+
+@router.post("/login")
+def login(
+    login_data: LoginData,
+    db: Session = Depends(get_db)
+):
+    usuario = db.query(Usuario).filter(
+        Usuario.username == login_data.username
+    ).first()
+
+    if not usuario:
+        return JSONResponse(
+            status_code=401,
+            content={
+                "error": "Usuario no encontrado"
+            }
+        )
+
+    if not verificar_password(
+        login_data.password,
+        usuario.password_hash
+    ):
+        return JSONResponse(
+            status_code=401,
+            content={
+                "error": "Contraseña incorrecta"
+            }
+        )
+
+    if not usuario.activo:
+        return JSONResponse(
+            status_code=401,
+            content={
+                "error": "Usuario inactivo"
+            }
+        )
+
+    token = crear_token_acceso(
+        data={
+            "sub": usuario.username,
+            "id": usuario.id
+        }
+    )
+
+    return {
+        "token": token,
+        "usuario": {
+            "id": usuario.id,
+            "username": usuario.username,
+            "nombre_completo": usuario.nombre_completo,
+            "email": usuario.email
+        }
+    }
 
 
-router = APIRouter(
-    prefix="/usuarios",
-    tags=["usuarios"]
-)
 
 # ================================
 # USUARIOS
 # ================================
 
-@router.post("/")
+@router.post("/usuarios")
 def crear_usuario(usuario: UsuarioCreate, db: Session = Depends(get_db)):
     
     existe = db.query(Usuario).filter(
@@ -30,10 +87,12 @@ def crear_usuario(usuario: UsuarioCreate, db: Session = Depends(get_db)):
             }
         )
 
+    password_hash = hash_password(usuario.password)
+
     db_usuario = Usuario(
         username=usuario.username,
         email=usuario.email,
-        password_hash=hash_password(usuario.password),
+        password_hash=password_hash,
         nombre_completo=usuario.nombre_completo,
         permiso_cronograma=usuario.permiso_cronograma,
         permiso_reportes=usuario.permiso_reportes,
@@ -44,6 +103,7 @@ def crear_usuario(usuario: UsuarioCreate, db: Session = Depends(get_db)):
         permiso_usuarios=usuario.permiso_usuarios
     )
 
+    
     db.add(db_usuario)
     db.commit()
     db.refresh(db_usuario)
@@ -53,7 +113,9 @@ def crear_usuario(usuario: UsuarioCreate, db: Session = Depends(get_db)):
         "id": db_usuario.id
     }
 
-@router.get("/")
+  
+
+@router.get("/users")
 def listar_usuarios(
     db: Session = Depends(get_db)
 ):

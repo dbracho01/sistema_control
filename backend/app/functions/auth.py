@@ -1,6 +1,9 @@
 from passlib.context import CryptContext
 from typing import Optional
 from datetime import datetime, timedelta, date
+from config.index import *
+from jose import JWTError, jwt
+
 # ================================
 # SEGURIDAD
 # ================================
