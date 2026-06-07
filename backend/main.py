@@ -17,6 +17,7 @@ from database.db import Base, engine
 from routers import clientes, cotizaciones, equipos, intervensiones, metricas, productos, propuestas, usuarios, reportes
 from config.index import *
 from functions.auth import *
+from functions.users import *
 from schemas.index import *
 # ================================
 # APP
@@ -95,6 +96,7 @@ app.state.TEMP_DIR = TEMP_DIR
 
 Base.metadata.create_all(bind=engine)
 
+inicializar_admin()
 # ================================
 # ROOT
 # ================================
