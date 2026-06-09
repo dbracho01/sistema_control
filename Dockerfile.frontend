@@ -1,0 +1,18 @@
+FROM node:24-alpine
+
+WORKDIR /app
+
+# Copiar los archivos de configuración de paquetes
+COPY frontend_vuejs/package*.json ./
+
+# Instalar las dependencias de node
+RUN npm install
+
+# Copiar el resto del código fuente del frontend
+COPY frontend_vuejs/ ./
+
+# Exponer el puerto por defecto de desarrollo (Vite usa el 5173)
+EXPOSE 5173
+
+# Comando por defecto para iniciar el servidor de desarrollo escuchando en toda la red
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

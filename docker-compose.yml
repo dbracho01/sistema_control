@@ -1,0 +1,37 @@
+services:
+  # ==========================================
+  # SERVICIO DEL BACKEND (Django + FastAPI)
+  # ==========================================
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: backend
+    restart: always
+    # Redirige el puerto 8000 del contenedor al 8000 de tu máquina local
+    ports:
+      - "8000:8000"
+    # Mapeo de volúmenes para desarrollo (permite recarga en vivo sin reinstalar dependencias)
+    volumes:
+      - ./backend:/app
+    environment:
+      - DEBUG=1
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: app_frontend
+    restart: always
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend_vuejs:/app
+      # ⚠️ CRÍTICO: Esto evita que los node_modules de tu laptop 
+      # borren o sobrescriban los node_modules internos del contenedor
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+   
