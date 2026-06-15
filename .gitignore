@@ -1,1 +1,90 @@
 *.swp
+.venv310/
+*.db
+# ==========================================
+# Python & FastAPI .gitignore
+# ==========================================
+
+# --- Python Caché & Compilación ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# --- Entornos Virtuales (Virtual Environments) ---
+.venv/
+venv/
+ENV/
+env/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# --- Variables de Entorno (¡CRÍTICO POR SEGURIDAD!) ---
+# Nunca subas tus contraseñas, tokens o llaves secretas
+.env
+.env.*
+!.env.example
+.secrets
+*.pem
+
+# --- FastAPI / Uvicorn / Logs ---
+*.log
+logs/
+.web_assets/
+
+# --- Pruebas y Cobertura (Pytest, Coverage) ---
+.htmlcov/
+.tox/
+.nosexy/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# --- Base de Datos Local / Almacenamiento ---
+# Descomenta si usas SQLite local para pruebas y no quieres subir la DB
+*.db
+*.sqlite3
+
+# --- Docker (Opcional) ---
+# Descomenta si tu contenedor genera logs o data local de bases de datos
+# .docker/
+# pgdata/
+
+# --- Herramientas de Desarrollo e IDEs ---
+# VS Code
+.vscode/
+!.vscode/extensions.json
+*.code-workspace
+
+# JetBrains (PyCharm, WebStorm, etc.)
+.idea/
+
+# Sistema Operativo
+.DS_Store
+Thumbs.db
+
