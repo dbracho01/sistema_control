@@ -34,9 +34,10 @@ ENV PATH="/opt/venv/bin:$PATH"
 WORKDIR /app
 
 # 🛠️ AÑADIR DEPENDENCIAS PARA WEASYPRINT Y PDFKIT
-RUN apt-get update && apt-get install --no-install-recommends -y \
+RUN sed -i 's/deb.debian.org/ftp.us.debian.org/g' /etc/apt/sources.list.d/debian.sources && \
+    apt-get clean && \
+    apt-get update && apt-get install --no-install-recommends -y \
     libpq5 \
-    # Dependencias esenciales para WeasyPrint (Cairo, Pango)
     libpango-1.0-0 \
     libpangoft2-1.0-0 \
     libharfbuzz0b \
@@ -44,9 +45,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     libcairo2 \
     libgdk-pixbuf2.0-0 \
     shared-mime-info \
-    # Dependencia para PDFKit (Motor de renderizado)
     wkhtmltopdf \
-    # Fuentes básicas para que los PDFs no salgan con letras cuadradas o rotas
     fonts-liberation \
     && rm -rf /var/lib/apt/lists/*
 
