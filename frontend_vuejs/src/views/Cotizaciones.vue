@@ -142,10 +142,10 @@ import { useAuthStore } from '../store'
 import api from '../services/api'
 import Navbar from '../components/Navbar.vue'
 import Pagination from '../components/Pagination.vue'
-
+import config from '../config'
 const router = useRouter()
 const authStore = useAuthStore()
-const API_URL = 'http://localhost:8000'
+const API_URL = config.API_URL
 
 const cotizaciones = ref([])
 const clients = ref([])

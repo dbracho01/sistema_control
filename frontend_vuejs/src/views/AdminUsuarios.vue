@@ -121,8 +121,6 @@ import Pagination from '../components/Pagination.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
-const API_URL = 'http://localhost:8000'
-
 const users = ref([])
 const loading = ref(false)
 const showModal = ref(false)

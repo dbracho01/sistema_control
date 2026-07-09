@@ -25,15 +25,15 @@
             <div class="form-row">
               <div class="form-field">
                 <label>Date</label>
-                <input type="date" v-model="form.fecha" required>
+                <input type="date" v-model="form.fecha" required class="form-control">
               </div>
               <div class="form-field">
                 <label>Time</label>
-                <input type="time" v-model="form.hora" required>
+                <input type="time" v-model="form.hora" required class="form-control">
               </div>
               <div class="form-field">
                 <label>Technician</label>
-                <input type="text" v-model="form.tecnico" required placeholder="Technician name">
+                <input type="text" v-model="form.tecnico" required placeholder="Technician name" class="form-control">
               </div>
             </div>
 
@@ -49,7 +49,7 @@
             <div class="form-row">
               <div class="form-field">
                 <label>Equipment</label>
-                <select v-model="form.equipo_id" required>
+                <select v-model="form.equipo_id" required class="form-select">
                   <option :value="null">Select equipment...</option>
                   <option v-for="e in equipos" :key="e.id" :value="e.id">{{ e.equipo }} - {{ e.cliente }}</option>
                 </select>
@@ -65,15 +65,15 @@
 
             <h3>Problem Description / Failure</h3>
             <div class="form-field">
-              <textarea v-model="form.descripcion_problema" rows="4" placeholder="Describe the problem or failure..."></textarea>
+              <textarea v-model="form.descripcion_problema" rows="4" placeholder="Describe the problem or failure..." class="form-control"></textarea>
             </div>
 
             <h3>Materials / Parts Used</h3>
             <div class="materiales-container">
               <div v-for="(mat, idx) in form.materiales" :key="idx" class="material-row">
-                <input type="text" v-model="mat.descripcion" placeholder="Description" class="material-desc">
-                <input type="number" v-model.number="mat.cantidad" placeholder="Qty" min="1" class="material-cant">
-                <input type="text" v-model="mat.referencia" placeholder="Reference" class="material-ref">
+                <input type="text" v-model="mat.descripcion" placeholder="Description" class="material-desc form-control">
+                <input type="number" v-model.number="mat.cantidad" placeholder="Qty" min="1" class="material-cant form-control">
+                <input type="text" v-model="mat.referencia" placeholder="Reference" class="material-ref form-control">
                 <button type="button" class="btn-eliminar-material" @click="removeMaterial(idx)">🗑️</button>
               </div>
               <button type="button" class="btn-agregar-material" @click="addMaterial">+ Add Material</button>
@@ -81,8 +81,8 @@
 
             <h3>Signatures</h3>
             <div class="form-row">
-              <div class="form-field"><label>Technician Name</label><input type="text" v-model="form.firma_tecnico" placeholder="Technician name"></div>
-              <div class="form-field"><label>Client Name</label><input type="text" v-model="form.firma_cliente" placeholder="Client name"></div>
+              <div class="form-field"><label>Technician Name</label><input type="text" v-model="form.firma_tecnico" placeholder="Technician name" class="form-control"></div>
+              <div class="form-field"><label>Client Name</label><input type="text" v-model="form.firma_cliente" placeholder="Client name" class="form-control"></div>
             </div>
           </form>
 
@@ -137,10 +137,11 @@ import { useAuthStore } from '../store'
 import api from '../services/api'
 import Navbar from '../components/Navbar.vue'
 import Pagination from '../components/Pagination.vue'
+import config from '../config'
 
 const router = useRouter()
 const authStore = useAuthStore()
-const API_URL = 'http://localhost:8000'
+const API_URL = config.API_URL
 
 const equipos = ref([])
 const reportes = ref([])
