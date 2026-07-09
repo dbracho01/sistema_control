@@ -18,20 +18,10 @@ services:
       - DEBUG=1
       - PYTHONUNBUFFERED=1
       - PYTHONDONTWRITEBYTECODE=1
+    networks:
+      - shared_net
 
-  frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile.frontend
-    container_name: app_frontend
-    restart: always
-    pordddts:
-      - "5173:5173"
-    volumes:
-      - ./frontend_vuejs:/app
-      # ⚠️ CRÍTICO: Esto evita que los node_modules de tu laptop 
-      # borren o sobrescriban los node_modules internos del contenedor
-      - /app/node_modules
-    environment:
-      - NODE_ENV=development
-   
+
+networks:
+  shared_net:
+    external: true
