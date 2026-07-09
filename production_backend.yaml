@@ -15,9 +15,11 @@ services:
     volumes:
       - ./backend:/app
     environment:
-      - DEBUG=1
+      - DEBUG=0
       - PYTHONUNBUFFERED=1
       - PYTHONDONTWRITEBYTECODE=1
+    env_file:
+      - .env
     networks:
       - shared_net
 

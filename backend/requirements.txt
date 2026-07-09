@@ -26,6 +26,7 @@ pillow==10.4.0
 pyasn1==0.6.3
 pycparser==3.0
 pydantic==2.10.4
+pydantic-settings==2.14.2
 pydantic_core==2.27.2
 pydyf==0.11.0
 pyphen==0.15.0
@@ -41,6 +42,7 @@ SQLAlchemy==2.0.36
 starlette==0.41.3
 tinycss2==1.5.1
 tinyhtml5==2.1.0
+typing-inspection==0.4.2
 typing_extensions==4.15.0
 uvicorn==0.34.0
 uvloop==0.22.1
