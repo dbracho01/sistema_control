@@ -7,21 +7,6 @@ from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from reportlab.lib import colors
-from pydantic_settings import BaseSettings, SettingsConfigDict
-
-# ================================
-# CONFIGURACIÓN DE VARIABLES DE ENTORNO
-# ================================
-class Settings(BaseSettings):
-    # Valores por defecto para desarrollo local si no se detecta archivo .env
-    ENV: str = "development"
-    ALLOWED_ORIGINS: str = "http://localhost:5173,http://localhost:3000"
-    
-    # Esto busca un archivo .env de forma automática si existe
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
-
-settings = Settings()
-
 # ================================
 # DATABASE
 # ================================
